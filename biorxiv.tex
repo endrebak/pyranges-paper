@@ -144,15 +144,12 @@ nucleotide) in an extremely efficient manner. These run length encodings are
 stored in an object called PyRles. It includes readers for common
 file formats in bioinformatics such as bed, bam and gtf.
 
-% table of functionality
-% readers for common file formats
 \begin{table}[!ht]
-\begin{adjustwidth}{-1.5in}{0in} % comment out/remove adjustwidth environment if table fits in text column.
+\begin{adjustwidth}{-1.5in}{0in}
 \centering
 \caption{{\bf Functionality.} Methods available on PyRanges objects.}
 \begin{tabular}{|l|l|l|l|l|l|l|}
 \hline
-% \multicolumn{2}{|l|}{\bf Heading 2}\\ \hline
   {\bf Method} & {\bf Purpose} \\ \hline
   Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
   Intersection & For each feature in self, keep those that overlap with intervals in other \footnotemark \\ \hline
@@ -196,8 +193,18 @@ PyRanges very efficient.
 
 \subsection*{Advantages}
 
-% Keeps data in-memory
-% Is available for s
+In contrast to PyBedtools, PyRanges keeps the data in memory, which means that
+they do not need to be read into Python datastructures if you want to manipulate
+the data in ways possible by bedtools. Furthermore, PyBedtools uses the
+temporary disk to store data for the length of the Pybedtools session. In many
+instances, this is an onerous requirement, and makes pybedtools less suitable
+for writing general purpose libraries intended for use by others. This is
+because a library should work without the end user knowing it is there, but when
+there is a requirement for external resources such as disk space the end user
+needs to make sure they have enough space on their temp drive, or set their temp
+drive variable to something else. Also, if the user quits the a running workflow
+abruptly with multiple presses of control-c, the tempdrive will fill up with
+data that is not removed.
 
 \section*{Discussion}
 
@@ -206,10 +213,8 @@ libraries yet extends them with high-performance functionality for genomic
 analyses. As such we believe it will be useful for bioinformatics scripts and
 libraries written in Python.
 
-
 \bibliography{library}
 
-%This defines the bibliographies style. Search online for a list of available styles.
 \bibliographystyle{abbrv}
 
 \end{document}
