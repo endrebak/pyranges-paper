@@ -77,7 +77,7 @@
 \newline
 % authors go here:
 \\
-Endre Bakken Stovner\textsuperscript{1}\textsuperscript{+},
+Endre Bakken Stovner\textsuperscript{1},
 Pål Sætrom\textsuperscript{1, 2},
 \\
 \bf{1} Department of
@@ -94,11 +94,10 @@ Pål Sætrom\textsuperscript{1, 2},
 
 \section*{Abstract}
 
-\textbf{Summary:} PyRanges is a high-performance datastructure for
-representing and manipulating genomic ranges and their associated data in
-Python. Since it is directly compatible with Python's wealth of high-performance
-data science libraries we expect it to become a cornerstone of genomic analysis
-in Python.
+\textbf{Summary:} PyRanges is a high-performance datastructure for representing
+and manipulating genomic ranges and their associated data in Python. It is
+directly compatible with Python's wealth of high-performance data science
+libraries and is therefore well suited for genomic analyses.
 
 \textbf{Availability and Implementation:} PyRanges is available open-source under
 the MIT license at https://github.com/endrebak/pyranges
@@ -112,37 +111,100 @@ operations allow for answering complex questions. Several very popular command
 line tools for this purpose exist, like bedtools
 \cite{doi:10.1093/bioinformatics/btq033} and bedops
 \cite{doi:10.1093/bioinformatics/bts277}. There is also a wrapper for bedtools
-which allows easy use from Python \cite{doi:10.1093/bioinformatics/btr539}. In
-R, the foundational GenomicRanges library \cite{10.1371/journal.pcbi.1003118} is
-used for feature comparisons, and it is a cornerstone of genomics packages in
-the R BioConductor project.
+which allows easy use from Python \cite{doi:10.1093/bioinformatics/btr539}.
+
+Since feature comparisons is such a fundamental task, the datastructure
+GenomicRange for efficiently representing and operating on genomic intervals was
+invented. This datastructure removes the need for library authors to come up
+with their own custom and hard to maintain solutions and allows them to
+immediately begin solving their problem of interest. Indeed, in R, the
+foundational GenomicRanges library \cite{10.1371/journal.pcbi.1003118} is used
+for feature comparisons, and it is a cornerstone of genomics packages in the R
+BioConductor \cite{Gentleman2004} project. The new Julia language
+\cite{doi:10.1137/141000671} also has a package for GenomicRanges
+\cite{Haverty2017}.
 
 Python is the fourth largest programming language in the world and it is widely
-used in bioinformatics, yet Python lacks a GenomicRange implementation.
-
-The GenomicRange is a datastructure for efficiently representing and operating
-on genomic intervals. Each row contains a position (chromosome, start, end and
-optionally, strand) and an arbitrary number of metadata columns.
-
-Operations on pairs of GenomicRanges are especially useful. Then one list of
-ranges can be used to query another to find e.g. an overlapping or the nearest
-feature. So if one GenomicRange represents alignments and another represents
-genomic annotations, a nearest search would find the genomic feature closest to
-each alignment.
-
-As the data in a PyRanges object is stored
-
-
+used in bioinformatics, yet Python lacks a GenomicRange implementation. The
+PyRanges library remedies this.
 
 \section*{Library}
 
+PyRanges is a thin wrapper around genomic data contained in Pandas
+\cite{mckinney-proc-scipy-2010} dataframes. This allows one to directly use
+Python's wealth of libraries for scientific computing and plotting such as
+SciPy, NumPy, scikit-learn, matplotlib and seaborn \cite{scipy},
+\cite{oliphant-2006-guide}, \cite{scikit-learn}, \cite{Hunter:2007},
+\cite{michael_waskom_2017_883859} on the data in PyRanges objects. However, the
+PyRanges object is extended with many methods for subsetting and modifying it
+and for doing comparisons and queries with pairs of PyRanges. PyRanges also
+contains coverage methods, which allows one to represent and do arithmetic
+computations on the coverage (or some other numeric score associated with each
+nucleotide) in an extremely efficient manner. These run length encodings are
+stored in an object called PyRles. It includes readers for common
+file formats in bioinformatics such as bed, bam and gtf.
+
+% table of functionality
+% readers for common file formats
+\begin{table}[!ht]
+\begin{adjustwidth}{-1.5in}{0in} % comment out/remove adjustwidth environment if table fits in text column.
+\centering
+\caption{{\bf Functionality.} Methods available on PyRanges objects.}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+% \multicolumn{2}{|l|}{\bf Heading 2}\\ \hline
+  {\bf Method} & {\bf Purpose} \\ \hline
+  Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
+  Intersection & For each feature in self, keep those that overlap with intervals in other \footnotemark \\ \hline
+  Set Intersection & Treat the intervals in each PyRanges as a set and find the intersection \footnotemark \\ \hline
+  Overlap & Keep each feature in self that overlaps with at least one in other \\ \hline
+  Set Union & Treat the intervals in each PyRanges as a set and find the union \\ \hline
+  Subtract & For each feature in self, keep those parts that do not overlap with any feature in other \\ \hline
+  Set Subtract & Treat the intervals in each PyRanges as a set and subtract other from self \\ \hline
+  Nearest & For each feature in self, find the nearest in other \\ \hline
+  Cluster & Merge the overlapping features in a PyRanges object \\ \hline
+  Coverage & Create a dictionary of run length encodings from the PyRanges object \\ \hline
+\end{tabular}
+\label{tab1}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[!ht]
+\begin{adjustwidth}{-1.5in}{0in} % comment out/remove adjustwidth environment if table fits in text column.
+\centering
+\caption{{\bf Functionality.} Methods available on PyRles.}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+% \multicolumn{2}{|l|}{\bf Heading 2}\\ \hline
+  {\bf Method} & {\bf Purpose} \\ \hline
+  Arithmetic (+, -, *, /) & Do arithmetic operations on the values in a PyRles with other PyRles or numbers \\ \hline
+\end{tabular}
+\label{tab1}
+\end{adjustwidth}
+\end{table}
+
+\footnotetext{Like bedtools intersect}
+\footnotetext{Like BioConductor GenomicRanges intersect}
+
+\subsection*{Implementation}
 
 PyRanges uses the nested containment list, originally implemented in the PyGr
-library \cite{doi:10.1093/bioinformatics/btl647} for range based queries.
+library \cite{doi:10.1093/bioinformatics/btl647} for range based lookups and
+queries. The pyranges library is written in pure Python for rapid development
+and testing, but it depends on several C/Cython packages written to make
+PyRanges very efficient.
+
+\subsection*{Advantages}
+
+% Keeps data in-memory
+% Is available for s
 
 \section*{Discussion}
 
-\section*{Conclusion}
+PyRanges is a library that works well with the existing Python data science
+libraries yet extends them with high-performance functionality for genomic
+analyses. As such we believe it will be useful for bioinformatics scripts and
+libraries written in Python.
 
 
 \bibliography{library}
