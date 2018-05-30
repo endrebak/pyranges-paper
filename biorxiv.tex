@@ -141,7 +141,7 @@ and for doing comparisons and queries with pairs of PyRanges. PyRanges also
 contains coverage methods, which allows one to represent and do arithmetic
 computations on the coverage (or some other numeric score associated with each
 nucleotide) in an extremely efficient manner. These run length encodings are
-stored in an object called PyRles. It includes readers for common
+stored in an object called PyRles. PyRanges includes readers for common
 file formats in bioinformatics such as bed, bam and gtf.
 
 \begin{table}[!ht]
@@ -166,20 +166,6 @@ file formats in bioinformatics such as bed, bam and gtf.
 \end{adjustwidth}
 \end{table}
 
-\begin{table}[!ht]
-\begin{adjustwidth}{-1.5in}{0in} % comment out/remove adjustwidth environment if table fits in text column.
-\centering
-\caption{{\bf Functionality.} Methods available on PyRles.}
-\begin{tabular}{|l|l|l|l|l|l|l|}
-\hline
-% \multicolumn{2}{|l|}{\bf Heading 2}\\ \hline
-  {\bf Method} & {\bf Purpose} \\ \hline
-  Arithmetic (+, -, *, /) & Do arithmetic operations on the values in a PyRles with other PyRles or numbers \\ \hline
-\end{tabular}
-\label{tab1}
-\end{adjustwidth}
-\end{table}
-
 \footnotetext{Like bedtools intersect}
 \footnotetext{Like BioConductor GenomicRanges intersect}
 
@@ -193,18 +179,10 @@ PyRanges very efficient.
 
 \subsection*{Advantages}
 
-In contrast to PyBedtools, PyRanges keeps the data in memory, which means that
-they do not need to be read into Python datastructures if you want to manipulate
-the data in ways possible by bedtools. Furthermore, PyBedtools uses the
-temporary disk to store data for the length of the Pybedtools session. In many
-instances, this is an onerous requirement, and makes pybedtools less suitable
-for writing general purpose libraries intended for use by others. This is
-because a library should work without the end user knowing it is there, but when
-there is a requirement for external resources such as disk space the end user
-needs to make sure they have enough space on their temp drive, or set their temp
-drive variable to something else. Also, if the user quits the a running workflow
-abruptly with multiple presses of control-c, the tempdrive will fill up with
-data that is not removed.
+In contrast to PyRanges, which stores the data in memory, PyBedtools uses disk
+space for storing temporary results, which requires additional resource
+management by users and can lead to resource leaks; e.g. if the process calling
+PyBedtools is killed.
 
 \section*{Discussion}
 
