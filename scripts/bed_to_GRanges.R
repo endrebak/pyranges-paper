@@ -1,13 +1,13 @@
 library(GenomicRanges)
 library(rtracklayer)
-library(rbenchmark)
+library(data.table)
 
-f = snakemake@input[[1]],
+f = snakemake@input[[1]]
 stranded = snakemake@wildcards[["stranded"]]
 
-df = read.table(f, sep="\t",
-                col.names=c("Chromosome", "Start", "End", "Name", "Score", "Strand"),
-                header=FALSE)
+cmd = paste0("zcat ", f, " | cut -f 1-3,6")
+print(cmd)
+df = fread(cmd, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"))
 
 start.time <- Sys.time()
 
@@ -24,3 +24,5 @@ values(gr) = df$Name
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time
+
+write(time.taken, snakemake@output[[1]])
