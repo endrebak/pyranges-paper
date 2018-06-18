@@ -71,7 +71,7 @@
 % title goes here:
 \begin{flushleft}
 {\Large
-  \textbf\newline{pyranges: performant pythonic genomicranges}
+  \textbf\newline{pyranges: efficient comparisons of genomic intervals in Python}
   % and arithmetic run length-encoding
 }
 \newline
@@ -113,7 +113,7 @@ line tools for this purpose exist, like bedtools
 \cite{doi:10.1093/bioinformatics/bts277}. There is also a wrapper for bedtools
 which allows easy use from Python \cite{doi:10.1093/bioinformatics/btr539}.
 
-Since feature comparisons is such a fundamental task, the datastructure
+Since comparing sets of intervals is such a fundamental task, the datastructure
 GenomicRange for efficiently representing and operating on genomic intervals was
 invented. This datastructure removes the need for library authors to come up
 with their own custom and hard to maintain solutions and allows them to
@@ -125,7 +125,7 @@ BioConductor \cite{Gentleman2004} project. The new Julia language
 \cite{Haverty2017}.
 
 Python is the fourth largest programming language in the world and it is widely
-used in bioinformatics, yet Python lacks a GenomicRange implementation. The
+used in bioinformatics, yet Python lacks a GenomicRanges implementation. The
 PyRanges library remedies this.
 
 \section*{Library}
@@ -183,6 +183,10 @@ In contrast to PyRanges, which stores the data in memory, PyBedtools uses disk
 space for storing temporary results, which requires additional resource
 management by users and can lead to resource leaks; e.g. if the process calling
 PyBedtools is killed.
+
+\subsection*{Timings}
+
+
 
 \section*{Discussion}
 
