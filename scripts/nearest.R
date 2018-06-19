@@ -1,11 +1,10 @@
+
 library(GenomicRanges)
 library(data.table)
 
 fc = snakemake@input[["chip"]]
 fb = snakemake@input[["background"]]
 
-fc = "/mnt/scratch/endrebak/pyranges_benchmark/data/download/chip_5000000.bed.gz"
-fb = "/mnt/scratch/endrebak/pyranges_benchmark/data/download/input_5000000.bed.gz"
 
 print("Reading data table")
 cmd = paste0("zcat ", fc, " | cut -f 1-3,6")
@@ -18,30 +17,20 @@ print("creating granges")
 chip = GRanges(seqnames = chip_df$Chromosome, ranges = IRanges(start = chip_df$Start, end = chip_df$End), strand=chip_df$Strand)
 input = GRanges(seqnames = input_df$Chromosome, ranges = IRanges(start = input_df$Start, end = input_df$End), strand=input_df$Strand)
 
-print("computing coverage")
-chip = coverage(chip)
-background = coverage(input)
-
-## for (n in names(chip)){
-
-##   sumc = sum(runLength(chip[n]))
-##   sumb = sum(runLength(background[n]))
-
-##   # to avoid rotation
-##   if (sumc > sumb){
-##     background[n] = c(background[n], Rle(0, sumc - sumb))
-##   } else if (sumb > sumc){
-##     chip[n] = c(chip[n], Rle(0, sumb - sumc))
-##   }
-
-## }
+print("finding nearest")
 
 start.time <- Sys.time()
-res = chip - background
+result = nearest(chip, input, select="arbitrary")
+result = chip[result]
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time
 
+
 time.taken <- as.numeric(time.taken, units="secs")
 
-write(time.taken, file=snakemake@output[[1]])
+print(result)
+
+write(time.taken, file=snakemake@output[["time"]])
+
+write.table(result, file=snakemake@output[["result"]], sep=" ", row.names=FALSE, quote=FALSE)

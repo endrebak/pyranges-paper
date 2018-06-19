@@ -114,9 +114,9 @@ line tools for this purpose exist, like bedtools
 which allows easy use from Python \cite{doi:10.1093/bioinformatics/btr539}.
 
 Since comparing sets of intervals is such a fundamental task, the datastructure
-GenomicRange for efficiently representing and operating on genomic intervals was
-invented. This datastructure removes the need for library authors to come up
-with their own custom and hard to maintain solutions and allows them to
+GenomicRanges for efficiently representing and operating on genomic intervals
+was invented. This datastructure removes the need for library authors to come up
+with their own custom, slow and hard to maintain solutions and allows them to
 immediately begin solving their problem of interest. Indeed, in R, the
 foundational GenomicRanges library \cite{10.1371/journal.pcbi.1003118} is used
 for feature comparisons, and it is a cornerstone of genomics packages in the R
@@ -124,9 +124,9 @@ BioConductor \cite{Gentleman2004} project. The new Julia language
 \cite{doi:10.1137/141000671} also has a package for GenomicRanges
 \cite{Haverty2017}.
 
-Python is the fourth largest programming language in the world and it is widely
-used in bioinformatics, yet Python lacks a GenomicRanges implementation. The
-PyRanges library remedies this.
+Python is the fourth largest programming language in the world, the largest
+scripting language, and it is widely used in bioinformatics, yet Python lacks a
+GenomicRanges implementation. The PyRanges library remedies this.
 
 \section*{Library}
 
@@ -144,30 +144,30 @@ nucleotide) in an extremely efficient manner. These run length encodings are
 stored in an object called PyRles. PyRanges includes readers for common
 file formats in bioinformatics such as bed, bam and gtf.
 
-\begin{table}[!ht]
-\begin{adjustwidth}{-1.5in}{0in}
-\centering
-\caption{{\bf Functionality.} Methods available on PyRanges objects.}
-\begin{tabular}{|l|l|l|l|l|l|l|}
-\hline
-  {\bf Method} & {\bf Purpose} \\ \hline
-  Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
-  Intersection & For each feature in self, keep those that overlap with intervals in other \footnotemark \\ \hline
-  Set Intersection & Treat the intervals in each PyRanges as a set and find the intersection \footnotemark \\ \hline
-  Overlap & Keep each feature in self that overlaps with at least one in other \\ \hline
-  Set Union & Treat the intervals in each PyRanges as a set and find the union \\ \hline
-  Subtract & For each feature in self, keep those parts that do not overlap with any feature in other \\ \hline
-  Set Subtract & Treat the intervals in each PyRanges as a set and subtract other from self \\ \hline
-  Nearest & For each feature in self, find the nearest in other \\ \hline
-  Cluster & Merge the overlapping features in a PyRanges object \\ \hline
-  Coverage & Create a dictionary of run length encodings from the PyRanges object \\ \hline
-\end{tabular}
-\label{tab1}
-\end{adjustwidth}
-\end{table}
+% \begin{table}[!ht]
+% \begin{adjustwidth}{-1.5in}{0in}
+% \centering
+% \caption{{\bf Functionality.} Methods available on PyRanges objects.}
+% \begin{tabular}{|l|l|l|l|l|l|l|}
+% \hline
+%   {\bf Method} & {\bf Purpose} \\ \hline
+%   Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
+%   Intersection & For each feature in self, keep those that overlap with intervals in other \footnotemark \\ \hline
+%   Set Intersection & Treat the intervals in each PyRanges as a set and find the intersection \footnotemark \\ \hline
+%   Overlap & Keep each feature in self that overlaps with at least one in other \\ \hline
+%   Set Union & Treat the intervals in each PyRanges as a set and find the union \\ \hline
+%   Subtract & For each feature in self, keep those parts that do not overlap with any feature in other \\ \hline
+%   Set Subtract & Treat the intervals in each PyRanges as a set and subtract other from self \\ \hline
+%   Nearest & For each feature in self, find the nearest in other \\ \hline
+%   Cluster & Merge the overlapping features in a PyRanges object \\ \hline
+%   Coverage & Create a dictionary of run length encodings from the PyRanges object \\ \hline
+% \end{tabular}
+% \label{tab1}
+% \end{adjustwidth}
+% \end{table}
 
-\footnotetext{Like bedtools intersect}
-\footnotetext{Like BioConductor GenomicRanges intersect}
+% \footnotetext{Like bedtools intersect}
+% \footnotetext{Like BioConductor GenomicRanges intersect}
 
 \subsection*{Implementation}
 
@@ -183,6 +183,9 @@ In contrast to PyRanges, which stores the data in memory, PyBedtools uses disk
 space for storing temporary results, which requires additional resource
 management by users and can lead to resource leaks; e.g. if the process calling
 PyBedtools is killed.
+
+In contrast to bioconductor GenomicRanges, operations on PyRanges returns new
+PyRanges-objects, not indices.
 
 \subsection*{Timings}
 

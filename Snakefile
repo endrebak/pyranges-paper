@@ -1,4 +1,4 @@
-"Snakemake workflow to benchmark pyranges vs genomicranges."
+"Snakemake workflow to benchmark pyranges vs bioconductor genomicranges/s4vectors."
 
 from time import time
 import datetime
@@ -19,41 +19,51 @@ def regex(lst):
 
     return "({})".format("|".join([str(e) for e in lst]))
 
+bed_to_coverage_files = expand("{prefix}/benchmark/bed_to_coverage/{library}/{chip}_{size}_time.txt",
+                               prefix=prefix, chip="chip", size=sizes, library="bioconductor pyranges".split()),
+
+
+bed_to_granges_files = expand("{prefix}/benchmark/bed_to_granges/{library}/{chip}_{size}_time.txt",
+                              prefix=prefix, chip="chip", size=sizes, library="bioconductor pyranges".split()),
+
+chip_minus_input_files = expand("{prefix}/benchmark/chip_minus_input/{library}/{size}_time.txt",
+                                prefix=prefix, size=sizes, library="bioconductor pyranges".split()),
+
+intersection_files = expand("{prefix}/benchmark/intersection/{library}/{size}_time.txt",
+                            prefix=prefix, size=sizes, library="bioconductor pyranges".split())
+
+nearest_files = expand("{prefix}/benchmark/nearest/{library}/{size}_time.txt",
+                       prefix=prefix, size=sizes, library="bioconductor pyranges".split())
+
 
 rule all:
     input:
-        expand("{prefix}/benchmark/bed_to_coverage/{library}/{chip}_{size}_time.txt",
-               prefix=prefix, chip=test_files, size=sizes, library="bioconductor pyranges".split()),
-        expand("{prefix}/benchmark/bed_to_granges/{library}/{chip}_{size}_time.txt",
-               prefix=prefix, chip=test_files, size=sizes, library="bioconductor pyranges".split()),
-        expand("{prefix}/benchmark/chip_minus_input/{library}/{size}_time.txt",
-               prefix=prefix, size=sizes, library="bioconductor pyranges".split()),
-        expand("{prefix}/benchmark/intersection/{library}/{size}_time.txt",
-               prefix=prefix, size=sizes, library="bioconductor pyranges".split())
+        bed_to_granges_files, bed_to_coverage_files, chip_minus_input_files, intersection_files, nearest_files
 
 
 rule intersection:
     input:
-        expand("{prefix}/benchmark/intersection/{library}/{size}_time.txt",
-               prefix=prefix, size=sizes, library="bioconductor pyranges".split())
+        intersection_files
 
 
 rule rle:
     input:
-        expand("{prefix}/benchmark/chip_minus_input/{library}/{size}_time.txt",
-               prefix=prefix, size=sizes, library="bioconductor pyranges".split()),
+        chip_minus_input_files
 
 
 rule bed_to_granges:
     input:
-        expand("{prefix}/benchmark/bed_to_granges/{library}/{chip}_{size}_time.txt",
-                chip=test_files,prefix=prefix, size=sizes, library="bioconductor pyranges".split()),
+        bed_to_granges_files
+
 
 rule bed_to_coverage:
     input:
-        expand("{prefix}/benchmark/bed_to_coverage/{library}/{chip}_{size}_time.txt",
-               chip=test_files,prefix=prefix, size=sizes, library="bioconductor pyranges".split()),
+        bed_to_coverage_files
 
+
+rule nearest:
+    input:
+        nearest_files
 
 
 wildcard_constraints:
@@ -87,8 +97,6 @@ rule pyranges_bed_to_coverage:
     output:
         timing = "{prefix}/benchmark/bed_to_coverage/pyranges/{chip}_{size}_time.txt",
         preview = "{prefix}/benchmark/bed_to_coverage/pyranges/{chip}_{size}_preview.txt"
-    threads:
-        25
     benchmark:
         "{prefix}/benchmark/bed_to_coverage/pyranges/{chip}_{size}_benchmark.txt"
     run:
@@ -115,8 +123,6 @@ rule bioconductor_bed_to_coverage:
     output:
         timing = "{prefix}/benchmark/bed_to_coverage/bioconductor/{chip}_{size}_time.txt",
         result = "{prefix}/benchmark/bed_to_coverage/bioconductor/{chip}_{size}_preview.txt"
-    threads:
-        25
     benchmark:
         "{prefix}/benchmark/bed_to_coverage/bioconductor/{chip}_{size}_benchmark.txt"
     script:
@@ -165,6 +171,8 @@ rule pyranges_chip_minus_input:
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         "{prefix}/benchmark/chip_minus_input/pyranges/{size}_time.txt"
+    benchmark:
+        "{prefix}/benchmark/chip_minus_input/pyranges/{size}_benchmark.txt"
     run:
         chip_f = input.chip
         background_f = input.background
@@ -203,6 +211,8 @@ rule bioconductor_chip_minus_input:
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         "{prefix}/benchmark/chip_minus_input/bioconductor/{size}_time.txt"
+    benchmark:
+        "{prefix}/benchmark/chip_minus_input/bioconductor/{size}_benchmark.txt"
     script:
         "scripts/chip_minus_input.R"
 
@@ -214,38 +224,10 @@ rule pyranges_intersection:
     output:
         time = "{prefix}/benchmark/intersection/pyranges/{size}_time.txt",
         result = "{prefix}/benchmark/intersection/pyranges/{size}_result.txt"
-    run:
-        chip_f = input.chip
-        background_f = input.background
-
-        chip = pd.read_table(chip_f, sep="\t",
-                             usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
-        cgr = PyRanges(chip)
-
-        background = pd.read_table(background_f, sep="\t",
-                                   usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
-        bgr = PyRanges(background)
-
-        start = time()
-        print("starting")
-        result = cgr.set_intersection(bgr, strandedness="same")
-
-        end = time()
-
-        print("ending")
-        print(result)
-
-        total = end - start
-
-        total_dt = datetime.datetime.fromtimestamp(total)
-
-        minutes_seconds = total_dt.strftime('%-M.%-S.%f')
-
-        open(output.time, "w+").write(minutes_seconds)
-        result.df.to_csv(output.result, sep=" ", index=False)
-
-
-
+    benchmark:
+        "{prefix}/benchmark/intersection/pyranges/{size}_benchmark.txt"
+    script:
+        "scripts/intersection.py"
 
 
 rule bioconductor_intersection:
@@ -255,6 +237,8 @@ rule bioconductor_intersection:
     output:
         time = "{prefix}/benchmark/intersection/bioconductor/{size}_time.txt",
         result = "{prefix}/benchmark/intersection/bioconductor/{size}_result.txt"
+    benchmark:
+        "{prefix}/benchmark/intersection/bioconductor/{size}_benchmark.txt"
     script:
         "scripts/intersection.R"
 
@@ -264,40 +248,21 @@ rule pyranges_nearest:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        "{prefix}/benchmark/nearest/pyranges/{size}_time.txt"
-    run:
-        chip_f = input.chip
-        background_f = input.background
+        time = "{prefix}/benchmark/nearest/pyranges/{size}_time.txt",
+        result = "{prefix}/benchmark/nearest/pyranges/{size}_result.txt"
+    benchmark:
+        "{prefix}/benchmark/nearest/pyranges/{size}_benchmark.txt"
+    script:
+        "script/nearest.py"
 
-        chip = pd.read_table(chip_f, sep="\t",
-                             usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
-        cgr = PyRanges(chip)
-
-        background = pd.read_table(background_f, sep="\t",
-                                   usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
-        bgr = PyRanges(background)
-
-        start = time()
-        result = cgr.nearest(bgr)
-
-        end = time()
-
-        print(result)
-
-        total = end - start
-
-        total_dt = datetime.datetime.fromtimestamp(total)
-
-        minutes_seconds = total_dt.strftime('%-M.%-S.%f')
-
-        open(output[0], "w+").write(minutes_seconds)
-
-
-# rule bioconductor_nearest:
-#     input:
-#         chip = "{prefix}/data/download/chip_{size}.bed.gz",
-#         background = "{prefix}/data/download/input_{size}.bed.gz",
-#     output:
-#         "{prefix}/benchmark/intersection/bioconductor/{size}_time.txt"
-#     script:
-#         "scripts/chip_minus_input.R"
+rule bioconductor_nearest:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/nearest/bioconductor/{size}_time.txt",
+        result = "{prefix}/benchmark/nearest/bioconductor/{size}_result.txt"
+    benchmark:
+        "{prefix}/benchmark/nearest/bioconductor/{size}_benchmark.txt"
+    script:
+        "scripts/nearest.R"
