@@ -6,8 +6,9 @@ from time import time
 import datetime
 
 
-chip = pd.read_table(snakemake.input[0], sep="\t",
-                        usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
+chip = pd.read_table(snakemake.input[0], sep="\t", usecols=[0, 1, 2, 5],
+                     header=None, names="Chromosome Start End Strand".split(),
+                     dtype={"Chromosome": "category", "Strand": "category"})
 start = time()
 grles = PyRles(chip, stranded=True)
 end = time()

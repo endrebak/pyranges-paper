@@ -33,7 +33,9 @@ all_files = expand("{prefix}/memcheck/{function}/{runs}.txt",
 
 rule all:
     input:
-        all_files
+        f"{prefix}/benchmark/graphs/memleak.png",
+        all_files,
+        f"{prefix}/memcheck/collected_results.txt"
 
 
 rule shuffle:
@@ -44,6 +46,7 @@ rule shuffle:
     shell:
         "zcat {input[0]} | shuf -n 100000 | gzip > {output[0]}"
 
+
 rule pandas_baseline:
     input:
         chip = "{prefix}/data/download/chip_100000.bed.gz",
@@ -51,7 +54,7 @@ rule pandas_baseline:
     output:
         "{prefix}/memcheck/pandas_baseline/1.txt"
     shell:
-        "valgrind --log-file={output[0]} --tool=memcheck --leak-check=full --num-callers=30 --suppressions=valgrind-python.supp python scripts/pandas_mem.py {input[0]} {wildcards.runs}"
+        "valgrind --log-file={output[0]} --tool=memcheck --leak-check=full --num-callers=30 --suppressions=valgrind-python.supp python scripts/pandas_mem.py {input[0]} {input[1]}"
 
 
 rule pyranges_bed_to_coverage:
@@ -124,9 +127,23 @@ rule collect_files:
             indirectly -= pdi
             possibly -= pdp
 
-            rowdicts.append({"Function": func, "Runs": run, "Definite": definite, "Possibly": possibly, "Indirectly": indirectly})
+            definite = max(definite, 0)
+            indirectly = max(indirectly, 0)
+            possibly = max(possibly, 0)
 
-        df = pd.DataFrame.from_dict(rowdicts).sort_values("Function Runs".split())
-        column_order = "Function Runs Definite Possibly Indirectly".split()
+            for s, v in zip("Definite Possibly Indirectly".split(), [definite, possibly, indirectly]):
+                rowdicts.append({"Function": func, "Iterations": run, "LeakType": s, "MegaBytes": v / (1024 * 1024)})
+
+        df = pd.DataFrame.from_dict(rowdicts).sort_values("Function Iterations".split())
+        column_order = "Function Iterations LeakType MegaBytes".split()
 
         df[column_order].to_csv(output[0], index=False, sep="\t")
+
+
+rule graph_memleaks:
+    input:
+        "{prefix}/memcheck/collected_results.txt"
+    output:
+        "{prefix}/benchmark/graphs/memleak.png"
+    script:
+        "scripts/graph_memleaks.R"

@@ -5,7 +5,7 @@ f = snakemake@input[[1]]
 
 cmd = paste0("zcat ", f, " | cut -f 1-3,6")
 print(cmd)
-df = fread(cmd, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"))
+df = fread(cmd, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"), stringsAsFactors=TRUE)
 
 start.time <- Sys.time()
 

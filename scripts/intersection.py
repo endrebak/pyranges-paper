@@ -10,11 +10,11 @@ background_f = snakemake.input.background
 
 chip = pd.read_table(chip_f, sep="\t",
                         usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
-cgr = PyRanges(chip)
+cgr = PyRanges(chip, copy_df=False)
 
 background = pd.read_table(background_f, sep="\t",
                             usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
-bgr = PyRanges(background)
+bgr = PyRanges(background, copy_df=False)
 
 start = time()
 

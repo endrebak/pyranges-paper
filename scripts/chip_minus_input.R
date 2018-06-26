@@ -8,8 +8,8 @@ print("Reading data table")
 cmd = paste0("zcat ", fc, " | cut -f 1-3,6")
 cmd_bg= paste0("zcat ", fb, " | cut -f 1-3,6")
 
-chip_df = fread(cmd, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"))
-input_df = fread(cmd_bg, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"))
+chip_df = fread(cmd, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"), stringsAsFactors=TRUE)
+input_df = fread(cmd_bg, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"), stringsAsFactors=TRUE)
 
 print("creating granges")
 chip = GRanges(seqnames = chip_df$Chromosome, ranges = IRanges(start = chip_df$Start, end = chip_df$End), strand=chip_df$Strand)
@@ -18,6 +18,8 @@ input = GRanges(seqnames = input_df$Chromosome, ranges = IRanges(start = input_d
 print("computing coverage")
 chip = coverage(chip)
 background = coverage(input)
+
+
 
 start.time <- Sys.time()
 res = chip / background
@@ -28,19 +30,3 @@ time.taken <- end.time - start.time
 time.taken <- as.numeric(time.taken, units="secs")
 
 write(time.taken, file=snakemake@output[[1]])
-
-
-
-## for (n in names(chip)){
-
-##   sumc = sum(runLength(chip[n]))
-##   sumb = sum(runLength(background[n]))
-
-##   # to avoid rotation
-##   if (sumc > sumb){
-##     background[n] = c(background[n], Rle(0, sumc - sumb))
-##   } else if (sumb > sumc){
-##     chip[n] = c(chip[n], Rle(0, sumb - sumc))
-##   }
-
-## }
