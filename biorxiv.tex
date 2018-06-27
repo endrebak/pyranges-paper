@@ -1,5 +1,6 @@
 \documentclass[10pt,letterpaper]{article}
 \usepackage[top=0.85in,left=2.75in,footskip=0.75in,marginparwidth=2in]{geometry}
+\usepackage{listings}
 
 % use Unicode characters - try changing the option if you run into troubles with special characters (e.g. umlauts)
 
@@ -95,9 +96,9 @@ Pål Sætrom\textsuperscript{1, 2},
 \section*{Abstract}
 
 \textbf{Summary:} PyRanges is a high-performance datastructure for representing
-and manipulating genomic ranges and their associated data in Python. It is
-directly compatible with Python's wealth of high-performance data science
-libraries and is therefore well suited for genomic analyses.
+and manipulating genomic intervals and their associated data in Python. It is
+directly compatible with Python's wealth of data science libraries and is
+therefore well suited for genomic analyses.
 
 \textbf{Availability and Implementation:} PyRanges is available open-source under
 the MIT license at https://github.com/endrebak/pyranges
@@ -107,7 +108,7 @@ the MIT license at https://github.com/endrebak/pyranges
 \section*{Introduction}
 
 Comparing sets of intervals is a fundamental task in genomics, and a few basic
-operations allow for answering complex questions. Several very popular command
+operations allow for answering complex questions. Several popular command
 line tools for this purpose exist, like bedtools
 \cite{doi:10.1093/bioinformatics/btq033} and bedops
 \cite{doi:10.1093/bioinformatics/bts277}. There is also a wrapper for bedtools
@@ -119,7 +120,7 @@ was invented. This datastructure removes the need for library authors to come up
 with their own custom, slow and hard to maintain solutions and allows them to
 immediately begin solving their problem of interest. Indeed, in R, the
 foundational GenomicRanges library \cite{10.1371/journal.pcbi.1003118} is used
-for feature comparisons, and it is a cornerstone of genomics packages in the R
+for interval comparisons, and it is a cornerstone of genomics packages in the R
 BioConductor \cite{Gentleman2004} project. The new Julia language
 \cite{doi:10.1137/141000671} also has a package for GenomicRanges
 \cite{Haverty2017}.
@@ -136,46 +137,21 @@ Python's wealth of libraries for scientific computing and plotting such as
 SciPy, NumPy, scikit-learn, matplotlib and seaborn \cite{scipy},
 \cite{oliphant-2006-guide}, \cite{scikit-learn}, \cite{Hunter:2007},
 \cite{michael_waskom_2017_883859} on the data in PyRanges objects. However, the
-PyRanges object is extended with many methods for subsetting and modifying it
-and for doing comparisons and queries with pairs of PyRanges. PyRanges also
-contains coverage methods, which allows one to represent and do arithmetic
-computations on the coverage (or some other numeric score associated with each
-nucleotide) in an extremely efficient manner. These run length encodings are
-stored in an object called PyRles. PyRanges includes readers for common
-file formats in bioinformatics such as bed, bam and gtf.
-
-% \begin{table}[!ht]
-% \begin{adjustwidth}{-1.5in}{0in}
-% \centering
-% \caption{{\bf Functionality.} Methods available on PyRanges objects.}
-% \begin{tabular}{|l|l|l|l|l|l|l|}
-% \hline
-%   {\bf Method} & {\bf Purpose} \\ \hline
-%   Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
-%   Intersection & For each feature in self, keep those that overlap with intervals in other \footnotemark \\ \hline
-%   Set Intersection & Treat the intervals in each PyRanges as a set and find the intersection \footnotemark \\ \hline
-%   Overlap & Keep each feature in self that overlaps with at least one in other \\ \hline
-%   Set Union & Treat the intervals in each PyRanges as a set and find the union \\ \hline
-%   Subtract & For each feature in self, keep those parts that do not overlap with any feature in other \\ \hline
-%   Set Subtract & Treat the intervals in each PyRanges as a set and subtract other from self \\ \hline
-%   Nearest & For each feature in self, find the nearest in other \\ \hline
-%   Cluster & Merge the overlapping features in a PyRanges object \\ \hline
-%   Coverage & Create a dictionary of run length encodings from the PyRanges object \\ \hline
-% \end{tabular}
-% \label{tab1}
-% \end{adjustwidth}
-% \end{table}
-
-% \footnotetext{Like bedtools intersect}
-% \footnotetext{Like BioConductor GenomicRanges intersect}
+PyRanges object is extended with many methods for subsetting and modifying it,
+and for doing comparisons and queries with pairs of PyRanges. PyRanges includes
+readers for common file formats in bioinformatics such as bed, bam and gtf.
+PyRanges also contains coverage methods, which allows one to represent and do
+arithmetic on the coverage (or some other numeric score associated with each
+nucleotide) in an extremely efficient manner. The coverage is stored as run
+length encodings in an object called PyRles.
 
 \subsection*{Implementation}
 
 PyRanges uses the nested containment list, originally implemented in the PyGr
 library \cite{doi:10.1093/bioinformatics/btl647} for range based lookups and
 queries. The pyranges library is written in pure Python for rapid development
-and testing, but it depends on several C/Cython packages written to make
-PyRanges very efficient.
+and testing, but it depends on several C/Cython packages specifically written to
+make PyRanges very efficient.
 
 \subsection*{Advantages}
 
@@ -184,19 +160,275 @@ space for storing temporary results, which requires additional resource
 management by users and can lead to resource leaks; e.g. if the process calling
 PyBedtools is killed.
 
-In contrast to bioconductor GenomicRanges, operations on PyRanges returns new
-PyRanges-objects, not indices.
+\section*{Performance}
 
-\subsection*{Timings}
+PyRanges was tested against GenomicRanges for speed, shown in figure \ref{fig1},
+and memory usage, shown in the supplementaries. For object instantiation,
+PyRanges is a bit slower than GenomicRanges, but for the operations themselves
+PyRanges is up to twice as fast.
 
+\begin{figure}
+% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
+\includegraphics[width=1\textwidth]{graphs/time.png}
+% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
+\caption{Time in seconds: PyRanges vs. GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
+\label{fig1} % use \ref{fig1} to reference to this figure
+\end{figure} % avoid blank space here
 
+\section*{Testing}
+
+To test the PyRanges library, three different types of testing were used.
+
+\subsection*{Unit-testing}
+
+Regular unit tests were written for all functions and their settings. This was
+mostly to aid development using test-driven development.
+
+\subsection*{Property-based testing}
+
+To ensure correctness, PyRanges was tested against long-lived, well-tested and
+popular libraries that provide the same functionality like bedtools and R
+GenomicRanges. PyRanges and these existing libraries were run on tens of
+thousands of random examples produced by hypothesis
+(https://github.com/HypothesisWorks/hypothesis) to ensure that PyRanges returned
+the same result.
+
+In addition to using hypothesis for oracular testing, we also used hypothesis to
+ensure that some properties that should always hold (such as inverse operations
+on runlengths, like + and - gives the start value as a result) indeed held true.
+
+\subsection*{Testing for memory-leaks}
+
+Valgrind \cite{Nethercote:2007:SBM:1254810.1254820} was used to ensure that the
+high-performance C/Cython code did not leak memory.
+
+The memory leakage of different PyRanges functionality (e.g. intersection, rle
+division) was measured. The functions were repeated 1, 10, 100 and 1000 times in
+a loop so that cumulative effects of potentially small leaks could be detected.
+In figure \ref{fig1}, we deducted the initial 0,00015-MB memory leak detected
+from importing pandas (which PyRanges depends on) in the results.
+
+\begin{figure}
+% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
+\includegraphics[width=1\textwidth]{graphs/memleak.png}
+% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
+\caption{Memory leaks in megabytes incurred by different PyRanges functionality.
+  Since the potential memory leaks were not increasing with the number of
+  iterations, it seems unlikely that they are proper memory
+  leaks.} % add dummy caption - otherwise \label won't work and figure numbering will not count up
+\label{fig1} % use \ref{fig1} to reference to this figure
+\end{figure} % avoid blank space here
+
+\section*{Memory usage}
+
+Memory usage of the PyRanges library was tested using the benchmarking
+capabilities of Snakemake \cite{doi:10.1093/bioinformatics/bty350}. It works by
+polling the running process, which means that the estimates for memory usage
+also includes setup.
+
+For most functionality, PyRanges uses a bit less memory than GenomicRanges. The
+only cases where PyRanges uses more memory is for rle arithmetic and nearest,
+where PyRanges leverages this memory to make the operations more than twice as
+fast as R GenomicRanges. There is some variability in the memory usage, which is
+to be expected for garbage collected languages.
+
+\begin{figure}
+% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
+\includegraphics[width=1\textwidth]{graphs/memory.png}
+% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
+\caption{Memory usage in GigaBytes: PyRanges vs GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
+\label{fig1} % use \ref{fig1} to reference to this figure
+\end{figure} % avoid blank space here
+
+\pagebreak
+\section*{Functionality}
+
+\begin{table}[!ht]
+\begin{adjustwidth}{-1.5in}{0in}
+\centering
+\caption{{\bf Functionality.} Methods available on PyRanges objects.}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+  {\bf Method} & {\bf Purpose} \\ \hline
+  Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
+  Intersection & For each feature in self, keep those that overlap with intervals in other \footnotemark \\ \hline
+  Set Intersection & Treat the intervals in each PyRanges as a set and find the intersection \footnotemark \\ \hline
+  Overlap & Keep each feature in self that overlaps with at least one in other \\ \hline
+  Set Union & Treat the intervals in each PyRanges as a set and find the union \\ \hline
+  Subtract & For each feature in self, keep those parts that do not overlap with any feature in other \\ \hline
+  Set Subtract & Treat the intervals in each PyRanges as a set and subtract other from self \\ \hline
+  Nearest & For each feature in self, find the nearest in other \\ \hline
+  Cluster & Merge the overlapping features in a PyRanges object \\ \hline
+  Coverage & Create a dictionary of run length encodings from the PyRanges object \\ \hline
+\end{tabular}
+\label{tab1}
+\end{adjustwidth}
+\end{table}
+
+\footnotetext{Like bedtools intersect}
+\footnotetext{Like BioConductor GenomicRanges intersect}
+
+\section*{Example Usage}
+
+\begin{adjustwidth}{-2in}{0in}
+\begin{flushright}
+\begin{lstlisting}[language=Python, linewidth=30cm, basicstyle=\small]
+  import pyranges as pr
+  from pyranges import PyRanges
+
+  > gr1 = pr.read_bed('f1.bed')
+
+  +--------------+---------+-------+--------+---------+----------+
+  | Chromosome   |   Start |   End | Name   |   Score | Strand   |
+  |--------------+---------+-------+--------+---------+----------|
+  | chr1         |       3 |     6 | h      |       0 | +        |
+  | chr1         |       5 |     7 | h      |       0 | -        |
+  | chr1         |       8 |     9 | h      |       0 | +        |
+  +--------------+---------+-------+--------+---------+----------+
+  PyRanges object has 3 sequences from 1 chromosomes.
+
+  > gr2 = pr.read_bed('f2.bed')
+
+  +--------------+---------+-------+--------+---------+----------+
+  | Chromosome   |   Start |   End | Name   |   Score | Strand   |
+  |--------------+---------+-------+--------+---------+----------|
+  | chr1         |       1 |     2 | f      |       0 | +        |
+  | chr1         |       6 |     7 | f      |       0 | -        |
+  +--------------+---------+-------+--------+---------+----------+
+  PyRanges object has 2 sequences from 1 chromosomes.
+
+  > n = gr1.nearest(gr2, strandedness="opposite", overlapping=False, suffix='_')
+
+  # The PyRanges data can be accessed with .df
+  > n.df[["Chromosome", "Start", "End", "Strand", "Start_", "End_", "Strand_", "Distance"]]
+
+    Chromosome  Start  End Strand  Start_  End_ Strand_  Distance
+  0       chr1      3    6      +       6     7       -         1
+  1       chr1      8    9      +       6     7       -         2
+  2       chr1      5    7      -       1     2       +         4
+
+  # Easily create new PyRanges from a df
+
+  > PyRanges(n.df[["Chromosome", "Start", "End", "Strand", "Start_", "End_", "Strand_", "Distance"]])
+
+  +--------------+---------+-------+----------+----------+--------+-----------+------------+
+  | Chromosome   |   Start |   End | Strand   |   Start_ |   End_ | Strand_   |   Distance |
+  |--------------+---------+-------+----------+----------+--------+-----------+------------|
+  | chr1         |       3 |     6 | +        |        6 |      7 | -         |          1 |
+  | chr1         |       8 |     9 | +        |        6 |      7 | -         |          2 |
+  | chr1         |       5 |     7 | -        |        1 |      2 | +         |          4 |
+  +--------------+---------+-------+----------+----------+--------+-----------+------------+
+  PyRanges object has 3 sequences from 1 chromosomes.
+
+  > gr1.intersection(gr2)
+
+  +--------------+---------+-------+--------+---------+----------+
+  | Chromosome   |   Start |   End | Name   |   Score | Strand   |
+  |--------------+---------+-------+--------+---------+----------|
+  | chr1         |       6 |     7 | h      |       0 | -        |
+  +--------------+---------+-------+--------+---------+----------+
+  PyRanges object has 1 sequences from 1 chromosomes.
+
+  > c = gr1.cluster()
+  > c
+
+  +--------------+---------+-------+
+  | Chromosome   |   Start |   End |
+  |--------------+---------+-------|
+  | chr1         |       3 |     7 |
+  | chr1         |       8 |     9 |
+  +--------------+---------+-------+
+  PyRanges object has 2 sequences from 1 chromosomes.
+
+  > c.df.insert(3, 'ID', ["A", "B"])
+  > c
+
+  +--------------+---------+-------+------+
+  | Chromosome   |   Start |   End | ID   |
+  |--------------+---------+-------+------|
+  | chr1         |       3 |     7 | A    |
+  | chr1         |       8 |     9 | B    |
+  +--------------+---------+-------+------+
+  PyRanges object has 2 sequences from 1 chromosomes.
+
+  > cv1 = gr1.coverage(strand=True)
+  > cv1
+
+  chr1 +
+  --
+  +--------+-----+-----+-----+-----+
+  | Runs   |   3 |   3 |   2 |   1 |
+  |--------+-----+-----+-----+-----|
+  | Values |   0 |   1 |   0 |   1 |
+  +--------+-----+-----+-----+-----+
+  Rle of length 9 containing 4 elements
+
+  chr1 -
+  --
+  +--------+-----+-----+
+  | Runs   |   5 |   2 |
+  |--------+-----+-----|
+  | Values |   0 |   1 |
+  +--------+-----+-----+
+  Rle of length 7 containing 2 elements
+  PyRles object with 2 chromosomes/strand pairs.
+
+  > cv2 = gr2.coverage(strand=True)
+  > cv2
+
+  chr1 +
+  --
+  +--------+-----+-----+
+  | Runs   |   1 |   1 |
+  |--------+-----+-----|
+  | Values |   0 |   1 |
+  +--------+-----+-----+
+  Rle of length 2 containing 2 elements
+
+  chr1 -
+  --
+  +--------+-----+-----+
+  | Runs   |   6 |   1 |
+  |--------+-----+-----|
+  | Values |   0 |   1 |
+  +--------+-----+-----+
+  Rle of length 7 containing 2 elements
+  PyRles object with 2 chromosomes/strand pairs.
+
+  > cv1 - cv2
+
+    chr1 +
+  --
+  +--------+-----+-----+-----+-----+-----+-----+
+  | Runs   |   1 |   1 |   1 |   3 |   2 |   1 |
+  |--------+-----+-----+-----+-----+-----+-----|
+  | Values |   0 |  -1 |   0 |   1 |   0 |   1 |
+  +--------+-----+-----+-----+-----+-----+-----+
+  Rle of length 9 containing 6 elements
+
+  chr1 -
+  --
+  +--------+-----+-----+-----+
+  | Runs   |   5 |   1 |   1 |
+  |--------+-----+-----+-----|
+  | Values |   0 |   1 |   0 |
+  +--------+-----+-----+-----+
+  Rle of length 7 containing 3 elements
+  PyRles object with 2 chromosomes/strand pairs.
+
+\end{lstlisting}
+\end{flushright}
+
+\end{adjustwidth}
 
 \section*{Discussion}
 
-PyRanges is a library that works well with the existing Python data science
-libraries yet extends them with high-performance functionality for genomic
-analyses. As such we believe it will be useful for bioinformatics scripts and
-libraries written in Python.
+PyRanges works well with the existing Python data science libraries yet extends
+them with high-performance functionality for genomic analyses. As such we
+believe it will be useful for everything from simplifying one-off analysis
+scripts to providing a foundation for bioinformatics libraries written in
+Python.
+
 
 \bibliography{library}
 
