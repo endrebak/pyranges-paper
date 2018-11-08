@@ -1,8 +1,10 @@
+
 library(GenomicRanges)
 library(data.table)
 
 fc = snakemake@input[["chip"]]
 fb = snakemake@input[["background"]]
+
 
 print("Reading data table")
 cmd = paste0("zcat ", fc, " | cut -f 1-3,6")
@@ -15,20 +17,19 @@ print("creating granges")
 chip = GRanges(seqnames = chip_df$Chromosome, ranges = IRanges(start = chip_df$Start, end = chip_df$End), strand=chip_df$Strand)
 input = GRanges(seqnames = input_df$Chromosome, ranges = IRanges(start = input_df$Start, end = input_df$End), strand=input_df$Strand)
 
-print("finding nearest")
+print("intersecting")
 
 start.time <- Sys.time()
-result = distanceToNearest(chip, input, select="arbitrary")
-c = chip[subjectHits(result)]
-c$distance = as.data.frame(result)$distance
+result = intersect(chip, input)
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time
 
+
 time.taken <- as.numeric(time.taken, units="secs")
 
-print(c)
+print(result)
 
 write(time.taken, file=snakemake@output[["time"]])
 
-## write.table(c, file=snakemake@output[["result"]], sep=" ", row.names=FALSE, quote=FALSE)
+## write.table(result, file=snakemake@output[["result"]], sep=" ", row.names=FALSE, quote=FALSE)

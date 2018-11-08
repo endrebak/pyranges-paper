@@ -1,5 +1,15 @@
 
 import pandas as pd
+
+import ray
+
+num_cores = int(snakemake.wildcards.num_cores)
+if num_cores != 1:
+    ray.init(num_cpus=num_cores)
+else:
+    ray.init(local_mode=True) # logging_level=logging.CRITICAL # local_mode=True
+
+
 from pyranges import PyRanges
 
 from time import time
@@ -8,17 +18,36 @@ import datetime
 chip_f = snakemake.input.chip
 background_f = snakemake.input.background
 
+start_init = time()
 chip = pd.read_table(chip_f, sep="\t",
-                        usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
-cgr = PyRanges(chip, copy_df=False)
+                     usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split(), engine="c",
+                     dtype={"Chromosome": "category", "Strand": "category"} )
+end_init = time()
+print("read_time", end_init - start_init)
 
+start_init = time()
+cgr = PyRanges(chip, copy_df=False)
+end_init = time()
+
+print(end_init - start_init)
+
+start_init = time()
 background = pd.read_table(background_f, sep="\t",
-                            usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split())
+                           usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split(), engine="c",
+                     dtype={"Chromosome": "category", "Strand": "category"} )
+
+end_init = time()
+print("read_time", end_init - start_init)
+
+start_init = time()
 bgr = PyRanges(background, copy_df=False)
+end_init = time()
+
+print(end_init - start_init)
 
 start = time()
 
-result = cgr.set_intersection(bgr, strandedness="same")
+result = cgr.intersection(bgr, strandedness="same")
 
 end = time()
 
@@ -32,4 +61,4 @@ minutes_seconds = total_dt.strftime('%-M.%-S.%f')
 
 open(snakemake.output[0], "w+").write(minutes_seconds)
 
-result.df.to_csv(snakemake.output.result, sep=" ", index=False)
+# result.df.to_csv(snakemake.output.result, sep=" ", index=False)

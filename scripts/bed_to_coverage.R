@@ -25,4 +25,4 @@ time.taken <- end.time - start.time
 time.taken <- as.numeric(time.taken, units="secs")
 
 write(time.taken, snakemake@output[["timing"]])
-capture.output(print(chip_list), file=snakemake@output[["result"]])
+capture.output(print(chip_list), file=snakemake@output[["preview"]])

@@ -101,11 +101,13 @@ directly compatible with Python's wealth of data science libraries and is
 therefore well suited for genomic analyses.
 
 \textbf{Availability and Implementation:} PyRanges is available open-source under
-the MIT license at https://github.com/endrebak/pyranges
+the MIT license at https://github.com/endrebak/pyranges and documentation exists
+at https://endrebak.github.io/pyranges/
 
 \textbf{Contact:} endrebak85@gmail.com
 
 \section*{Introduction}
+
 
 Comparing sets of intervals is a fundamental task in genomics, and a few basic
 operations allow for answering complex questions. Several popular command
@@ -129,7 +131,7 @@ Python is the fourth largest programming language in the world, the largest
 scripting language, and it is widely used in bioinformatics, yet Python lacks a
 GenomicRanges implementation. The PyRanges library remedies this.
 
-\section*{Library}
+\section*{Methods}
 
 PyRanges is a thin wrapper around genomic data contained in Pandas
 \cite{mckinney-proc-scipy-2010} dataframes. This allows one to directly use
@@ -138,110 +140,17 @@ SciPy, NumPy, scikit-learn, matplotlib and seaborn \cite{scipy},
 \cite{oliphant-2006-guide}, \cite{scikit-learn}, \cite{Hunter:2007},
 \cite{michael_waskom_2017_883859} on the data in PyRanges objects. However, the
 PyRanges object is extended with many methods for subsetting and modifying it,
-and for doing comparisons and queries with pairs of PyRanges. PyRanges includes
-readers for common file formats in bioinformatics such as bed, bam and gtf.
-PyRanges also contains coverage methods, which allows one to represent and do
-arithmetic on the coverage (or some other numeric score associated with each
-nucleotide) in an extremely efficient manner. The coverage is stored as run
-length encodings in an object called PyRles.
+and for doing comparisons and queries with pairs of PyRanges. The most important
+are shown in table \ref{tab1}. PyRanges includes readers for common file formats
+in bioinformatics such as bed, bam and gtf. PyRanges also contains coverage
+methods, which allows one to represent and do arithmetic on the coverage (or
+some other numeric score associated with each nucleotide) in an extremely
+efficient manner. The coverage is stored as run length encodings in an object
+called PyRles.
 
-\subsection*{Implementation}
-
-PyRanges uses the nested containment list, originally implemented in the PyGr
-library \cite{doi:10.1093/bioinformatics/btl647} for range based lookups and
-queries. The pyranges library is written in pure Python for rapid development
-and testing, but it depends on several C/Cython packages specifically written to
-make PyRanges very efficient.
-
-\subsection*{Advantages}
-
-In contrast to PyRanges, which stores the data in memory, PyBedtools uses disk
-space for storing temporary results, which requires additional resource
-management by users and can lead to resource leaks; e.g. if the process calling
-PyBedtools is killed.
-
-\section*{Performance}
-
-PyRanges was tested against GenomicRanges for speed, shown in figure \ref{fig1},
-and memory usage, shown in the supplementaries. For object instantiation,
-PyRanges is a bit slower than GenomicRanges, but for the operations themselves
-PyRanges is up to twice as fast.
-
-\begin{figure}
-% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
-\includegraphics[width=1\textwidth]{graphs/time.png}
-% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
-\caption{Time in seconds: PyRanges vs. GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
-\label{fig1} % use \ref{fig1} to reference to this figure
-\end{figure} % avoid blank space here
-
-\section*{Testing}
-
-To test the PyRanges library, three different types of testing were used.
-
-\subsection*{Unit-testing}
-
-Regular unit tests were written for all functions and their settings. This was
-mostly to aid development using test-driven development.
-
-\subsection*{Property-based testing}
-
-To ensure correctness, PyRanges was tested against long-lived, well-tested and
-popular libraries that provide the same functionality like bedtools and R
-GenomicRanges. PyRanges and these existing libraries were run on tens of
-thousands of random examples produced by hypothesis
-(https://github.com/HypothesisWorks/hypothesis) to ensure that PyRanges returned
-the same result.
-
-In addition to using hypothesis for oracular testing, we also used hypothesis to
-ensure that some properties that should always hold (such as inverse operations
-on runlengths, like + and - gives the start value as a result) indeed held true.
-
-\subsection*{Testing for memory-leaks}
-
-Valgrind \cite{Nethercote:2007:SBM:1254810.1254820} was used to ensure that the
-high-performance C/Cython code did not leak memory.
-
-The memory leakage of different PyRanges functionality (e.g. intersection, rle
-division) was measured. The functions were repeated 1, 10, 100 and 1000 times in
-a loop so that cumulative effects of potentially small leaks could be detected.
-In figure \ref{fig1}, we deducted the initial 0,00015-MB memory leak detected
-from importing pandas (which PyRanges depends on) in the results.
-
-\begin{figure}
-% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
-\includegraphics[width=1\textwidth]{graphs/memleak.png}
-% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
-\caption{Memory leaks in megabytes incurred by different PyRanges functionality.
-  Since the potential memory leaks were not increasing with the number of
-  iterations, it seems unlikely that they are proper memory
-  leaks.} % add dummy caption - otherwise \label won't work and figure numbering will not count up
-\label{fig1} % use \ref{fig1} to reference to this figure
-\end{figure} % avoid blank space here
-
-\section*{Memory usage}
-
-Memory usage of the PyRanges library was tested using the benchmarking
-capabilities of Snakemake \cite{doi:10.1093/bioinformatics/bty350}. It works by
-polling the running process, which means that the estimates for memory usage
-also includes setup.
-
-For most functionality, PyRanges uses a bit less memory than GenomicRanges. The
-only cases where PyRanges uses more memory is for rle arithmetic and nearest,
-where PyRanges leverages this memory to make the operations more than twice as
-fast as R GenomicRanges. There is some variability in the memory usage, which is
-to be expected for garbage collected languages.
-
-\begin{figure}
-% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
-\includegraphics[width=1\textwidth]{graphs/memory.png}
-% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
-\caption{Memory usage in GigaBytes: PyRanges vs GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
-\label{fig1} % use \ref{fig1} to reference to this figure
-\end{figure} % avoid blank space here
-
-\pagebreak
 \section*{Functionality}
+
+% TODO: find way to group
 
 \begin{table}[!ht]
 \begin{adjustwidth}{-1.5in}{0in}
@@ -264,162 +173,64 @@ to be expected for garbage collected languages.
 \label{tab1}
 \end{adjustwidth}
 \end{table}
-
 \footnotetext{Like bedtools intersect}
 \footnotetext{Like BioConductor GenomicRanges intersect}
 
-\section*{Example Usage}
 
-\begin{adjustwidth}{-2in}{0in}
-\begin{flushright}
-\begin{lstlisting}[language=Python, linewidth=30cm, basicstyle=\small]
-  import pyranges as pr
-  from pyranges import PyRanges
+\subsection*{Implementation}
 
-  > gr1 = pr.read_bed('f1.bed')
+PyRanges are stored in Pandas DataFrames, which are 2-D, mutable representations
+of data. To allow for range-queries and operations that uses such, the genomic
+intervals are stored in a nested containment list, originally implemented in the
+PyGr library \cite{doi:10.1093/bioinformatics/btl647}.
 
-  +--------------+---------+-------+--------+---------+----------+
-  | Chromosome   |   Start |   End | Name   |   Score | Strand   |
-  |--------------+---------+-------+--------+---------+----------|
-  | chr1         |       3 |     6 | h      |       0 | +        |
-  | chr1         |       5 |     7 | h      |       0 | -        |
-  | chr1         |       8 |     9 | h      |       0 | +        |
-  +--------------+---------+-------+--------+---------+----------+
-  PyRanges object has 3 sequences from 1 chromosomes.
+\section*{Performance}
 
-  > gr2 = pr.read_bed('f2.bed')
+The PyRanges library has been extensively tested for both speed and memory use.
+In the below tests, sorted files were used. This does not affect the runtime or
+memory-usage of PyRanges/GenomicRanges, but makes PyBedTools faster and less
+memory-consuming. As PyBedTools always reads and writes for each operation, it
+is impossible to measure purely the speed of the operation in PyBedTools.
 
-  +--------------+---------+-------+--------+---------+----------+
-  | Chromosome   |   Start |   End | Name   |   Score | Strand   |
-  |--------------+---------+-------+--------+---------+----------|
-  | chr1         |       1 |     2 | f      |       0 | +        |
-  | chr1         |       6 |     7 | f      |       0 | -        |
-  +--------------+---------+-------+--------+---------+----------+
-  PyRanges object has 2 sequences from 1 chromosomes.
+\subsection*{Speed}
 
-  > n = gr1.nearest(gr2, strandedness="opposite", overlapping=False, suffix='_')
+PyRanges was tested against GenomicRanges and PyBedtools for speed, shown in
+figure \ref{fig1}, and memory usage, shown in figure \ref{fig2}. For object
+instantiation, PyRanges is a bit slower than GenomicRanges, but for the
+operations themselves PyRanges is up to twice as fast. We see that PyBedTools
+matches the speed of the R and Python GenomicRanges-implementations as it can
+use the extremely efficient sweep algorithm. For most other algorithms we see
+that it uses a lot more time, however.
 
-  # The PyRanges data can be accessed with .df
-  > n.df[["Chromosome", "Start", "End", "Strand", "Start_", "End_", "Strand_", "Distance"]]
+\begin{figure}
+% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
+\includegraphics[width=1\textwidth]{graphs/time.pdf}
+% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
+\caption{Time in seconds: PyRanges vs. GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
+\label{fig1} % use \ref{fig1} to reference to this figure
+\end{figure} % avoid blank space here
 
-    Chromosome  Start  End Strand  Start_  End_ Strand_  Distance
-  0       chr1      3    6      +       6     7       -         1
-  1       chr1      8    9      +       6     7       -         2
-  2       chr1      5    7      -       1     2       +         4
+\subsection*{Memory usage}
 
-  # Easily create new PyRanges from a df
+Memory usage of the PyRanges library was tested using the benchmarking
+capabilities of Snakemake \cite{doi:10.1093/bioinformatics/bty350}. It works by
+polling the running process, which means that the estimates for memory usage
+also includes setup.
 
-  > PyRanges(n.df[["Chromosome", "Start", "End", "Strand", "Start_", "End_", "Strand_", "Distance"]])
+For most functionality, PyRanges uses a bit less memory than GenomicRanges. The
+only cases where PyRanges uses more memory is for rle arithmetic and nearest,
+where PyRanges leverages this memory to make the operations much faster
+than R GenomicRanges. There is some variability in the memory usage, which is to
+be expected for garbage collected languages. We see that pybedtools is extremely
+memory-efficient for many operations.
 
-  +--------------+---------+-------+----------+----------+--------+-----------+------------+
-  | Chromosome   |   Start |   End | Strand   |   Start_ |   End_ | Strand_   |   Distance |
-  |--------------+---------+-------+----------+----------+--------+-----------+------------|
-  | chr1         |       3 |     6 | +        |        6 |      7 | -         |          1 |
-  | chr1         |       8 |     9 | +        |        6 |      7 | -         |          2 |
-  | chr1         |       5 |     7 | -        |        1 |      2 | +         |          4 |
-  +--------------+---------+-------+----------+----------+--------+-----------+------------+
-  PyRanges object has 3 sequences from 1 chromosomes.
-
-  > gr1.intersection(gr2)
-
-  +--------------+---------+-------+--------+---------+----------+
-  | Chromosome   |   Start |   End | Name   |   Score | Strand   |
-  |--------------+---------+-------+--------+---------+----------|
-  | chr1         |       6 |     7 | h      |       0 | -        |
-  +--------------+---------+-------+--------+---------+----------+
-  PyRanges object has 1 sequences from 1 chromosomes.
-
-  > c = gr1.cluster()
-  > c
-
-  +--------------+---------+-------+
-  | Chromosome   |   Start |   End |
-  |--------------+---------+-------|
-  | chr1         |       3 |     7 |
-  | chr1         |       8 |     9 |
-  +--------------+---------+-------+
-  PyRanges object has 2 sequences from 1 chromosomes.
-
-  > c.df.insert(3, 'ID', ["A", "B"])
-  > c
-
-  +--------------+---------+-------+------+
-  | Chromosome   |   Start |   End | ID   |
-  |--------------+---------+-------+------|
-  | chr1         |       3 |     7 | A    |
-  | chr1         |       8 |     9 | B    |
-  +--------------+---------+-------+------+
-  PyRanges object has 2 sequences from 1 chromosomes.
-
-  > cv1 = gr1.coverage(strand=True)
-  > cv1
-
-  chr1 +
-  --
-  +--------+-----+-----+-----+-----+
-  | Runs   |   3 |   3 |   2 |   1 |
-  |--------+-----+-----+-----+-----|
-  | Values |   0 |   1 |   0 |   1 |
-  +--------+-----+-----+-----+-----+
-  Rle of length 9 containing 4 elements
-
-  chr1 -
-  --
-  +--------+-----+-----+
-  | Runs   |   5 |   2 |
-  |--------+-----+-----|
-  | Values |   0 |   1 |
-  +--------+-----+-----+
-  Rle of length 7 containing 2 elements
-  PyRles object with 2 chromosomes/strand pairs.
-
-  > cv2 = gr2.coverage(strand=True)
-  > cv2
-
-  chr1 +
-  --
-  +--------+-----+-----+
-  | Runs   |   1 |   1 |
-  |--------+-----+-----|
-  | Values |   0 |   1 |
-  +--------+-----+-----+
-  Rle of length 2 containing 2 elements
-
-  chr1 -
-  --
-  +--------+-----+-----+
-  | Runs   |   6 |   1 |
-  |--------+-----+-----|
-  | Values |   0 |   1 |
-  +--------+-----+-----+
-  Rle of length 7 containing 2 elements
-  PyRles object with 2 chromosomes/strand pairs.
-
-  > cv1 - cv2
-
-    chr1 +
-  --
-  +--------+-----+-----+-----+-----+-----+-----+
-  | Runs   |   1 |   1 |   1 |   3 |   2 |   1 |
-  |--------+-----+-----+-----+-----+-----+-----|
-  | Values |   0 |  -1 |   0 |   1 |   0 |   1 |
-  +--------+-----+-----+-----+-----+-----+-----+
-  Rle of length 9 containing 6 elements
-
-  chr1 -
-  --
-  +--------+-----+-----+-----+
-  | Runs   |   5 |   1 |   1 |
-  |--------+-----+-----+-----|
-  | Values |   0 |   1 |   0 |
-  +--------+-----+-----+-----+
-  Rle of length 7 containing 3 elements
-  PyRles object with 2 chromosomes/strand pairs.
-
-\end{lstlisting}
-\end{flushright}
-
-\end{adjustwidth}
+\begin{figure}
+% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
+\includegraphics[width=1\textwidth]{graphs/memory.pdf}
+% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
+\caption{Memory usage in GigaBytes: PyRanges vs GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
+\label{fig2} % use \ref{fig1} to reference to this figure
+\end{figure} % avoid blank space here
 
 \section*{Discussion}
 
@@ -435,3 +246,175 @@ Python.
 \bibliographystyle{abbrv}
 
 \end{document}
+
+
+% \subsection*{Advantages}
+
+% In contrast to PyRanges, which stores the data in memory, PyBedtools uses disk
+% space for storing temporary results, which requires additional resource
+% management by users and can lead to resource leaks; e.g. if the process calling
+% PyBedtools is killed.
+
+% PyBedtools: rigid in input format. If one operation merges reads and does not
+% preserve all columns, then the file is not usable in further operations with
+% bedtools.
+
+% To make it go fast, need to sort. If already sorted, this is a waste of time.
+% Often a bother; need to keep two copies of same file.
+
+% Cannot do region-based lookups in bedfile easily.
+
+
+
+% \section*{Example Usage}
+
+% \begin{adjustwidth}{-2in}{0in}
+% \begin{flushright}
+% \begin{lstlisting}[language=Python, linewidth=30cm, basicstyle=\small]
+%   import pyranges as pr
+%   from pyranges import PyRanges
+
+%   > gr1 = pr.read_bed('f1.bed')
+
+%   +--------------+---------+-------+--------+---------+----------+
+%   | Chromosome   |   Start |   End | Name   |   Score | Strand   |
+%   |--------------+---------+-------+--------+---------+----------|
+%   | chr1         |       3 |     6 | h      |       0 | +        |
+%   | chr1         |       5 |     7 | h      |       0 | -        |
+%   | chr1         |       8 |     9 | h      |       0 | +        |
+%   +--------------+---------+-------+--------+---------+----------+
+%   PyRanges object has 3 sequences from 1 chromosomes.
+
+%   > gr2 = pr.read_bed('f2.bed')
+
+%   +--------------+---------+-------+--------+---------+----------+
+%   | Chromosome   |   Start |   End | Name   |   Score | Strand   |
+%   |--------------+---------+-------+--------+---------+----------|
+%   | chr1         |       1 |     2 | f      |       0 | +        |
+%   | chr1         |       6 |     7 | f      |       0 | -        |
+%   +--------------+---------+-------+--------+---------+----------+
+%   PyRanges object has 2 sequences from 1 chromosomes.
+
+%   > n = gr1.nearest(gr2, strandedness="opposite", overlapping=False, suffix='_')
+
+%   # The PyRanges data can be accessed with .df
+%   > n.df[["Chromosome", "Start", "End", "Strand", "Start_", "End_", "Strand_", "Distance"]]
+
+%     Chromosome  Start  End Strand  Start_  End_ Strand_  Distance
+%   0       chr1      3    6      +       6     7       -         1
+%   1       chr1      8    9      +       6     7       -         2
+%   2       chr1      5    7      -       1     2       +         4
+
+%   # Easily create new PyRanges from a df
+
+%   > PyRanges(n.df[["Chromosome", "Start", "End", "Strand", "Start_", "End_", "Strand_", "Distance"]])
+
+%   +--------------+---------+-------+----------+----------+--------+-----------+------------+
+%   | Chromosome   |   Start |   End | Strand   |   Start_ |   End_ | Strand_   |   Distance |
+%   |--------------+---------+-------+----------+----------+--------+-----------+------------|
+%   | chr1         |       3 |     6 | +        |        6 |      7 | -         |          1 |
+%   | chr1         |       8 |     9 | +        |        6 |      7 | -         |          2 |
+%   | chr1         |       5 |     7 | -        |        1 |      2 | +         |          4 |
+%   +--------------+---------+-------+----------+----------+--------+-----------+------------+
+%   PyRanges object has 3 sequences from 1 chromosomes.
+
+%   > gr1.intersection(gr2)
+
+%   +--------------+---------+-------+--------+---------+----------+
+%   | Chromosome   |   Start |   End | Name   |   Score | Strand   |
+%   |--------------+---------+-------+--------+---------+----------|
+%   | chr1         |       6 |     7 | h      |       0 | -        |
+%   +--------------+---------+-------+--------+---------+----------+
+%   PyRanges object has 1 sequences from 1 chromosomes.
+
+%   > c = gr1.cluster()
+%   > c
+
+%   +--------------+---------+-------+
+%   | Chromosome   |   Start |   End |
+%   |--------------+---------+-------|
+%   | chr1         |       3 |     7 |
+%   | chr1         |       8 |     9 |
+%   +--------------+---------+-------+
+%   PyRanges object has 2 sequences from 1 chromosomes.
+
+%   > c.df.insert(3, 'ID', ["A", "B"])
+%   > c
+
+%   +--------------+---------+-------+------+
+%   | Chromosome   |   Start |   End | ID   |
+%   |--------------+---------+-------+------|
+%   | chr1         |       3 |     7 | A    |
+%   | chr1         |       8 |     9 | B    |
+%   +--------------+---------+-------+------+
+%   PyRanges object has 2 sequences from 1 chromosomes.
+
+%   > cv1 = gr1.coverage(strand=True)
+%   > cv1
+
+%   chr1 +
+%   --
+%   +--------+-----+-----+-----+-----+
+%   | Runs   |   3 |   3 |   2 |   1 |
+%   |--------+-----+-----+-----+-----|
+%   | Values |   0 |   1 |   0 |   1 |
+%   +--------+-----+-----+-----+-----+
+%   Rle of length 9 containing 4 elements
+
+%   chr1 -
+%   --
+%   +--------+-----+-----+
+%   | Runs   |   5 |   2 |
+%   |--------+-----+-----|
+%   | Values |   0 |   1 |
+%   +--------+-----+-----+
+%   Rle of length 7 containing 2 elements
+%   PyRles object with 2 chromosomes/strand pairs.
+
+%   > cv2 = gr2.coverage(strand=True)
+%   > cv2
+
+%   chr1 +
+%   --
+%   +--------+-----+-----+
+%   | Runs   |   1 |   1 |
+%   |--------+-----+-----|
+%   | Values |   0 |   1 |
+%   +--------+-----+-----+
+%   Rle of length 2 containing 2 elements
+
+%   chr1 -
+%   --
+%   +--------+-----+-----+
+%   | Runs   |   6 |   1 |
+%   |--------+-----+-----|
+%   | Values |   0 |   1 |
+%   +--------+-----+-----+
+%   Rle of length 7 containing 2 elements
+%   PyRles object with 2 chromosomes/strand pairs.
+
+%   > cv1 - cv2
+
+%     chr1 +
+%   --
+%   +--------+-----+-----+-----+-----+-----+-----+
+%   | Runs   |   1 |   1 |   1 |   3 |   2 |   1 |
+%   |--------+-----+-----+-----+-----+-----+-----|
+%   | Values |   0 |  -1 |   0 |   1 |   0 |   1 |
+%   +--------+-----+-----+-----+-----+-----+-----+
+%   Rle of length 9 containing 6 elements
+
+%   chr1 -
+%   --
+%   +--------+-----+-----+-----+
+%   | Runs   |   5 |   1 |   1 |
+%   |--------+-----+-----+-----|
+%   | Values |   0 |   1 |   0 |
+%   +--------+-----+-----+-----+
+%   Rle of length 7 containing 3 elements
+%   PyRles object with 2 chromosomes/strand pairs.
+
+% \end{lstlisting}
+% \end{flushright}
+
+% \end{adjustwidth}

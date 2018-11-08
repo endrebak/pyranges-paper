@@ -1,8 +1,4 @@
 import pandas as pd
-
-# import ray
-# ray.init(num_cpus=2)
-
 from pyranges import PyRanges
 
 from time import time
@@ -11,28 +7,19 @@ import datetime
 chip_f = snakemake.input.chip
 background_f = snakemake.input.background
 
-nrows = None
-
-chip = pd.read_table(chip_f, sep="\t", usecols=[0, 1, 2, 5], header=None, nrows=nrows,
+chip = pd.read_table(chip_f, sep="\t", usecols=[0, 1, 2, 5], header=None,
                      names="Chromosome Start End Strand".split(),
                      dtype={"Chromosome": "category", "Strand": "category"} )
-start_init = time()
 cgr = PyRanges(chip, copy_df=False)
-end_init = time()
 
-print(end_init - start_init)
-
-background = pd.read_table(background_f, sep="\t", usecols=[0, 1, 2, 5], nrows=nrows,
+background = pd.read_table(background_f, sep="\t", usecols=[0, 1, 2, 5],
                            header=None, names="Chromosome Start End Strand".split(),
                            dtype={"Chromosome": "category", "Strand": "category"})
 
-start_init = time()
 bgr = PyRanges(background, copy_df=False)
-end_init = time()
 
-print(end_init - start_init)
 start = time()
-result = cgr.nearest(bgr, strandedness="same")
+result = cgr.nearest(bgr, strandedness="same", overlap=False)
 
 end = time()
 

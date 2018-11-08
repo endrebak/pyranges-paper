@@ -3,50 +3,57 @@
 from time import time
 import datetime
 
+import numpy as np
 import pandas as pd
 from pyranges import PyRanges
 from pyrle import PyRles
 
 prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
 
-test_files = {"chip": "ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/Histone_H3K27me3/Aorta/UCSD.Aorta.H3K27me3.STL003.bed.gz",
-              "input": "ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Aorta/UCSD.Aorta.Input.STL002.bed.gz"}
+# test_files = {"chip": "ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/Histone_H3K27me3/Aorta/UCSD.Aorta.H3K27me3.STL003.bed.gz",
+#               "input": "ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Aorta/UCSD.Aorta.Input.STL002.bed.gz"}
 
-sizes = [int(f) for f in [1e6, 5e6, 1e7, 1.5e7]]
+sizes = [int(f) for f in [1e6, 1e7, 1e8, 1e9, 1e10]]
 
 iterations = range(10)
 
-libraries = "bioconductor pyranges".split()
+libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48 pybedtools".split()
 
 def regex(lst):
 
     return "({})".format("|".join([str(e) for e in lst]))
 
+# sort = "sorted unsorted".split()
+sort = ["sorted"]
 
 wildcard_constraints:
-    chip = regex(test_files.keys()),
+    chip = "(chip|input)", # regex(test_files.keys()),
     size = regex(sizes),
     iteration = regex(iterations),
-    libraries = regex(libraries)
+    libraries = regex(libraries),
+    num_cores = regex([1, 2, 8, 24, 48]),
+    sorted = regex(sort)
+
+genomicranges_pyranges_only = "pyranges bioconductor".split()
+
+bed_to_coverage_files = expand("{prefix}/benchmark/bed_to_coverage/{library}/{iteration}_{size}_{sorted}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=genomicranges_pyranges_only, sorted=sort),
 
 
-bed_to_coverage_files = expand("{prefix}/benchmark/bed_to_coverage/{library}/{iteration}_{size}_time.txt",
-                               prefix=prefix, iteration=iterations, size=sizes, library=libraries),
+# bed_to_granges_files = expand("{prefix}/benchmark/bed_to_granges/{library}/{iteration}_{size}_{sorted}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort),
+
+chip_minus_input_files = expand("{prefix}/benchmark/chip_minus_input/{library}/{iteration}_{size}_{sorted}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=genomicranges_pyranges_only, sorted=sort),
 
 
-bed_to_granges_files = expand("{prefix}/benchmark/bed_to_granges/{library}/{iteration}_{size}_time.txt",
-                              prefix=prefix, iteration=iterations, size=sizes, library=libraries),
+intersection_files = expand("{prefix}/benchmark/intersection/{library}/{iteration}_{size}_{sorted}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
 
-chip_minus_input_files = expand("{prefix}/benchmark/chip_minus_input/{library}/{iteration}_{size}_time.txt",
-                                prefix=prefix, iteration=iterations, size=sizes, library=libraries),
+set_intersection_files = expand("{prefix}/benchmark/set_intersection/{library}/{iteration}_{size}_{sorted}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
 
-intersection_files = expand("{prefix}/benchmark/intersection/{library}/{iteration}_{size}_time.txt",
-                            prefix=prefix, iteration=iterations, size=sizes, library=libraries)
+nearest_files = expand("{prefix}/benchmark/nearest{type}/{library}/{iteration}_{size}_{sorted}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort, type=["", "_nonoverlapping"])
 
-nearest_files = expand("{prefix}/benchmark/nearest/{library}/{iteration}_{size}_time.txt",
-                       prefix=prefix, iteration=iterations, size=sizes, library=libraries)
+subtract_files = expand("{prefix}/benchmark/subtract/{library}/{iteration}_{size}_{sorted}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
 
-graph_files = [f"{prefix}/benchmark/graphs/time.png", f"{prefix}/benchmark/graphs/memory.png"]
+
+graph_files = [f"{prefix}/benchmark/graphs/time.pdf", f"{prefix}/benchmark/graphs/memory.pdf"]
 
 
 rule all:
@@ -59,9 +66,9 @@ rule graphs:
         graph_files
 
 
-rule intersection:
+rule set_intersection:
     input:
-        intersection_files
+        set_intersection_files
 
 
 rule rle:
@@ -69,9 +76,9 @@ rule rle:
         chip_minus_input_files
 
 
-rule bed_to_granges:
+rule subtract:
     input:
-        bed_to_granges_files
+        subtract_files
 
 
 rule bed_to_coverage:
@@ -84,24 +91,29 @@ rule nearest:
         nearest_files
 
 
-
-rule download_data:
+rule fetch_chromsizes:
     output:
-        "{prefix}/data/download/{chip}.bed.gz"
-    params:
-        lambda w: test_files[w.chip]
+        "{prefix}/data/download/chromsizes.txt"
     shell:
-        "curl {params[0]} > {output[0]}"
+        "fetchChromSizes hg38 | grep -v '_' > {output[0]}"
 
 
-# to test if sorting affects the results
-rule shuffle:
+rule generate_data:
     input:
-        "{prefix}/data/download/{chip}.bed.gz"
+        "{prefix}/data/download/chromsizes.txt"
     output:
         "{prefix}/data/download/{chip}_{size}.bed.gz"
     shell:
-        "zcat {input[0]} | shuf -n {wildcards.size} | gzip > {output[0]}"
+        "bedtools random -n {wildcards.size} -g {input[0]} | gzip -9 > {output[0]}"
+
+
+rule sort:
+    input:
+        "{prefix}/data/download/{chip}_{size}.bed.gz"
+    output:
+        "{prefix}/data/download/{chip}_{size}_sorted.bed.gz"
+    shell:
+        "zcat {input[0]} | sort -k1,1 -k2,2n | gzip > {output[0]}"
 
 
 rule pyranges_bed_to_coverage:
@@ -113,6 +125,8 @@ rule pyranges_bed_to_coverage:
         preview = "{prefix}/benchmark/bed_to_coverage/pyranges/{iteration}_{size}_preview.txt"
     benchmark:
         "{prefix}/benchmark/bed_to_coverage/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
     script:
         "scripts/bed_to_coverage.py"
 
@@ -123,35 +137,34 @@ rule bioconductor_bed_to_coverage:
         "{prefix}/data/download/chip_{size}.bed.gz"
     output:
         timing = "{prefix}/benchmark/bed_to_coverage/bioconductor/{iteration}_{size}_time.txt",
-        result = "{prefix}/benchmark/bed_to_coverage/bioconductor/{iteration}_{size}_preview.txt"
+        preview = "{prefix}/benchmark/bed_to_coverage/bioconductor/{iteration}_{size}_preview.txt"
     benchmark:
         "{prefix}/benchmark/bed_to_coverage/bioconductor/{iteration}_{size}_benchmark.txt"
     script:
         "scripts/bed_to_coverage.R"
 
 
-rule pyranges_bed_to_pyranges:
-    input:
-        "{prefix}/data/download/chip_{size}.bed.gz"
-    output:
-        "{prefix}/benchmark/bed_to_granges/pyranges/{iteration}_{size}_time.txt"
-    benchmark:
-        "{prefix}/benchmark/bed_to_granges/pyranges/{iteration}_{size}_benchmark.txt"
-    script:
-        "scripts/bed_to_GRanges.py"
+# rule pyranges_bed_to_pyranges:
+#     input:
+#         "{prefix}/data/download/chip_{size}.bed.gz"
+#     output:
+#         "{prefix}/benchmark/bed_to_granges/pyranges/{iteration}_{size}_time.txt"
+#     benchmark:
+#         "{prefix}/benchmark/bed_to_granges/pyranges/{iteration}_{size}_benchmark.txt"
+#     script:
+#         "scripts/bed_to_GRanges.py"
 
 
 
-rule bioconductor_bed_to_GRanges:
-    input:
-        "{prefix}/data/download/chip_{size}.bed.gz"
-    output:
-        "{prefix}/benchmark/bed_to_granges/bioconductor/{iteration}_{size}_time.txt"
-    benchmark:
-        "{prefix}/benchmark/bed_to_granges/bioconductor/{iteration}_{size}_benchmark.txt"
-    script:
-        "scripts/bed_to_GRanges.R"
-
+# rule bioconductor_bed_to_GRanges:
+#     input:
+#         "{prefix}/data/download/chip_{size}.bed.gz"
+#     output:
+#         "{prefix}/benchmark/bed_to_granges/bioconductor/{iteration}_{size}_time.txt"
+#     benchmark:
+#         "{prefix}/benchmark/bed_to_granges/bioconductor/{iteration}_{size}_benchmark.txt"
+#     script:
+#         "scripts/bed_to_GRanges.R"
 
 
 rule pyranges_chip_minus_input:
@@ -162,6 +175,8 @@ rule pyranges_chip_minus_input:
         "{prefix}/benchmark/chip_minus_input/pyranges/{iteration}_{size}_time.txt"
     benchmark:
         "{prefix}/benchmark/chip_minus_input/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
     script:
         "scripts/chip_minus_input.py"
 
@@ -178,15 +193,109 @@ rule bioconductor_chip_minus_input:
         "scripts/chip_minus_input.R"
 
 
+
+
+rule pybedtools_cluster:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/cluster/pybedtools/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/cluster/pybedtools/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/cluster_pybedtools.py"
+
+
+rule pyranges_cluster:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/cluster/pyranges/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/cluster/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/cluster.py"
+
+
+rule bioconductor_cluster:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/cluster/bioconductor/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/cluster/bioconductor/{iteration}_{size}_benchmark.txt"
+    script:
+        "scripts/cluster.R"
+
+
+
+rule pybedtools_overlap:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/overlap/pybedtools/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/overlap/pybedtools/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/overlap_pybedtools.py"
+
+
+rule pyranges_overlap:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/overlap/pyranges/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/overlap/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/overlap.py"
+
+
+rule bioconductor_overlap:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/overlap/bioconductor/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/overlap/bioconductor/{iteration}_{size}_benchmark.txt"
+    script:
+        "scripts/overlap.R"
+
+rule pybedtools_intersection:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/intersection/pybedtools/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/intersection/pybedtools/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/intersection_pybedtools.py"
+
+
 rule pyranges_intersection:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        time = "{prefix}/benchmark/intersection/pyranges/{iteration}_{size}_time.txt",
-        result = "{prefix}/benchmark/intersection/pyranges/{iteration}_{size}_result.txt"
+        time = "{prefix}/benchmark/intersection/pyranges_{num_cores}/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/intersection/pyranges/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/intersection/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
     script:
         "scripts/intersection.py"
 
@@ -197,11 +306,90 @@ rule bioconductor_intersection:
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         time = "{prefix}/benchmark/intersection/bioconductor/{iteration}_{size}_time.txt",
-        result = "{prefix}/benchmark/intersection/bioconductor/{iteration}_{size}_result.txt"
     benchmark:
         "{prefix}/benchmark/intersection/bioconductor/{iteration}_{size}_benchmark.txt"
     script:
         "scripts/intersection.R"
+
+
+rule pybedtools_set_intersection:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/set_intersection/pybedtools/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/set_intersection/pybedtools/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/set_intersection_pybedtools.py"
+
+
+rule pyranges_set_intersection:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/set_intersection/pyranges/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/set_intersection/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/set_intersection.py"
+
+
+rule bioconductor_set_intersection:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/set_intersection/bioconductor/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/set_intersection/bioconductor/{iteration}_{size}_benchmark.txt"
+    script:
+        "scripts/set_intersection.R"
+
+
+rule pyranges_subtract:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/subtract/pyranges/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/subtract/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/subtract.py"
+
+
+rule pybedtools_subtract:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/subtract/pybedtools/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/subtract/pybedtools/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/subtract_pybedtools.py"
+
+
+rule bioconductor_subtract:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/subtract/bioconductor/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/subtract/bioconductor/{iteration}_{size}_benchmark.txt"
+    script:
+        "scripts/subtraction.R"
 
 
 rule pyranges_nearest:
@@ -210,11 +398,26 @@ rule pyranges_nearest:
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         time = "{prefix}/benchmark/nearest/pyranges/{iteration}_{size}_time.txt",
-        result = "{prefix}/benchmark/nearest/pyranges/{iteration}_{size}_result.txt"
     benchmark:
         "{prefix}/benchmark/nearest/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
     script:
         "scripts/nearest.py"
+
+
+rule pybedtools_nearest:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/nearest/pybedtools/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/nearest/pybedtools/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/pybedtools_nearest.py"
 
 
 rule bioconductor_nearest:
@@ -223,18 +426,57 @@ rule bioconductor_nearest:
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         time = "{prefix}/benchmark/nearest/bioconductor/{iteration}_{size}_time.txt",
-        result = "{prefix}/benchmark/nearest/bioconductor/{iteration}_{size}_result.txt"
     benchmark:
         "{prefix}/benchmark/nearest/bioconductor/{iteration}_{size}_benchmark.txt"
     script:
         "scripts/nearest.R"
 
 
+rule pybedtools_nearest_nonoverlapping:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/nearest_nonoverlapping/pybedtools/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/nearest_nonoverlapping/pybedtools/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/pybedtools_nearest_nonoverlapping.py"
+
+
+rule pyranges_nearest_nonoverlapping:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/nearest_nonoverlapping/pyranges/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/nearest_nonoverlapping/pyranges/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "scripts/nearest_nonoverlapping.py"
+
+
+rule bioconductor_nearest_nonoverlapping:
+    input:
+        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        background = "{prefix}/data/download/input_{size}.bed.gz",
+    output:
+        time = "{prefix}/benchmark/nearest_nonoverlapping/bioconductor/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/nearest_nonoverlapping/bioconductor/{iteration}_{size}_benchmark.txt"
+    script:
+        "scripts/nearest_nonoverlapping.R"
+
+
 rule collect_times:
     input:
-        bed_to_granges_files, bed_to_coverage_files, chip_minus_input_files, intersection_files, nearest_files
+        bed_to_coverage_files, chip_minus_input_files, set_intersection_files, nearest_files, intersection_files, subtract_files
     output:
-        "{prefix}/benchmark/collected_timings.txt"
+        f"{prefix}/benchmark/collected_timings.txt"
     run:
         rowdicts = []
         for f in input:
@@ -244,7 +486,7 @@ rule collect_times:
 
             timing = open(f).readlines()[0].strip()
 
-            if library == "pyranges":
+            if library in ["pyranges", "pybedtools"]:
                 minutes, seconds, fraction = timing.split(".")
                 minutes, seconds = int(minutes), int(seconds)
                 seconds += minutes * 60
@@ -254,8 +496,8 @@ rule collect_times:
             max_rss = pd.read_table(bmark_f, sep="\t", usecols=[2], skiprows=1, squeeze=True, header=None).values[0] / 1024
 
             rowdict = {"Iteration": iteration, "MaxRSSGB": max_rss,
-                       "Seconds": timing, "Function": function, "Library": library, "NBIntervals":
-                       int(size)/int(1e6)}
+                       "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
+                       np.log10(size)}
 
             rowdicts.append(rowdict)
 
@@ -269,7 +511,7 @@ rule graph_results:
     input:
         "{prefix}/benchmark/collected_timings.txt"
     output:
-        "{prefix}/benchmark/graphs/time.png"
+        "{prefix}/benchmark/graphs/time.pdf"
     script:
         "scripts/graph_time.R"
 
@@ -278,6 +520,6 @@ rule graph_memory:
     input:
         "{prefix}/benchmark/collected_timings.txt"
     output:
-        "{prefix}/benchmark/graphs/memory.png"
+        "{prefix}/benchmark/graphs/memory.pdf"
     script:
         "scripts/graph_memory.R"
