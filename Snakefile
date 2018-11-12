@@ -135,10 +135,10 @@ rule pyranges_bed_to_coverage:
     input:
         "{prefix}/data/download/chip_{size}.bed.gz"
     output:
-        timing = "{prefix}/benchmark/bed_to_coverage/pyranges/{iteration}_{size}_time.txt",
-        preview = "{prefix}/benchmark/bed_to_coverage/pyranges/{iteration}_{size}_preview.txt"
+        timing = "{prefix}/benchmark/bed_to_coverage/pyranges_{num_cores}/{iteration}_{size}_time.txt",
+        preview = "{prefix}/benchmark/bed_to_coverage/pyranges_{num_cores}/{iteration}_{size}_preview.txt"
     benchmark:
-        "{prefix}/benchmark/bed_to_coverage/pyranges/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/bed_to_coverage/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
     threads:
         4
     script:
@@ -186,9 +186,9 @@ rule pyranges_chip_minus_input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        "{prefix}/benchmark/chip_minus_input/pyranges/{iteration}_{size}_time.txt"
+        "{prefix}/benchmark/chip_minus_input/pyranges_{num_cores}/{iteration}_{size}_time.txt"
     benchmark:
-        "{prefix}/benchmark/chip_minus_input/pyranges/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/chip_minus_input/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
     threads:
         4
     script:
@@ -226,9 +226,9 @@ rule pyranges_cluster:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
     output:
-        time = "{prefix}/benchmark/cluster/pyranges/{iteration}_{size}_time.txt",
+        time = "{prefix}/benchmark/cluster/pyranges_{num_cores}/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/cluster/pyranges/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/cluster/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
     threads:
         4
     script:
@@ -268,7 +268,7 @@ rule pyranges_overlap:
     output:
         time = "{prefix}/benchmark/overlap/pyranges_{num_cores}/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/overlap/pyranges/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/overlap/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
     threads:
         4
     script:
