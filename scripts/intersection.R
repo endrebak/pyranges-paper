@@ -19,7 +19,7 @@ input = GRanges(seqnames = input_df$Chromosome, ranges = IRanges(start = input_d
 print("intersecting")
 
 start.time <- Sys.time()
-pairs = findOverlapPairs(chip, input, ignore.strand = TRUE)
+pairs = findOverlapPairs(chip, input, ignore.strand = FALSE)
 result = pintersect(pairs)
 end.time <- Sys.time()
 

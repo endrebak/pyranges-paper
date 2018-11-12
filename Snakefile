@@ -31,7 +31,7 @@ wildcard_constraints:
     size = regex(sizes),
     iteration = regex(iterations),
     libraries = regex(libraries),
-    num_cores = regex([1, 2, 8, 24, 48]),
+    num_cores = regex([1, 2, 4, 8, 24, 48]),
     sorted = regex(sort)
 
 genomicranges_pyranges_only = "pyranges bioconductor".split()

@@ -1,0 +1,153 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[top=0.85in,left=2.75in,footskip=0.75in,marginparwidth=2in]{geometry}
+\usepackage{listings}
+
+% use Unicode characters - try changing the option if you run into troubles with special characters (e.g. umlauts)
+
+\usepackage[utf8]{inputenc}
+
+
+% clean citations
+\usepackage{cite}
+
+% hyperref makes references clicky. use \url{www.example.com} or \href{www.example.com}{description} to add a clicky url
+\usepackage{nameref,hyperref}
+
+% line numbers
+\usepackage[right]{lineno}
+
+% improves typesetting in LaTeX
+\usepackage{microtype}
+\DisableLigatures[f]{encoding = *, family = * }
+
+% text layout - change as needed
+\raggedright
+\setlength{\parindent}{0.5cm}
+\textwidth 5.25in
+\textheight 8.75in
+
+% use adjustwidth environment to exceed text width (see examples in text)
+\usepackage{changepage}
+
+% adjust caption style
+
+% remove brackets from references
+\makeatletter
+\renewcommand{\@biblabel}[1]{\quad#1.}
+\makeatother
+
+% headrule, footrule and page numbers
+\usepackage{lastpage,fancyhdr,graphicx}
+\usepackage{epstopdf}
+\pagestyle{myheadings}
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{\thepage/\pageref{LastPage}}
+\renewcommand{\footrule}{\hrule height 2pt \vspace{2mm}}
+\fancyheadoffset[L]{2.25in}
+\fancyfootoffset[L]{2.25in}
+
+% use \textcolor{color}{text} for colored text (e.g. highlight to-do areas)
+\usepackage{color}
+
+% define custom colors (this one is for figure captions)
+\definecolor{Gray}{gray}{.25}
+
+% this is required to include graphics
+\usepackage{graphicx}
+
+% use if you want to put caption to the side of the figure - see example in text
+\usepackage{sidecap}
+
+% use for have text wrap around figures
+\usepackage{wrapfig}
+\usepackage[pscoord]{eso-pic}
+\usepackage[fulladjust]{marginnote}
+\reversemarginpar
+
+% document begins here
+\begin{document}
+\vspace*{0.35in}
+
+% title goes here:
+\begin{flushleft}
+{\Large
+  \textbf\newline{pyranges: an efficient and flexible library for comparing genomic intervals}
+  % and arithmetic run length-encoding
+}
+\newline
+% authors go here:
+\\
+Endre Bakken Stovner\textsuperscript{1},
+Pål Sætrom\textsuperscript{1, 2},
+\\
+\bf{1} Department of
+  Computer Science, Norwegian University
+  of Science and Technology, Trondheim, 7013, Norway
+\\
+\bf{2} Department of Clinical and Molecular Medicine, Norwegian
+  University of Science and Technology, Trondheim, 7013, Norway
+\\
+\bf{3} Bioinformatics Core Facility, Norwegian University of Science and
+Technology, Trondheim, 7013, Norway
+\\
+\bf{4} K.G. Jebsen Center for Genetic Epidemiology, Department of Public Health
+and Nursing, Norwegian University of Science and Technology, Trondheim, Norway
+\\
+\bigskip
+* endrebak85@gmail.com
+
+\end{flushleft}
+
+A Correspondence (formerly Letters to the Editor) is a flexible format that may include anything of interest to the journal's readers, from policy debates to announcements to 'matters arising' from research papers. A Correspondence may describe primary research data, but only in summary form; this format is not intended for full presentation of data. Correspondence should never be more than one printed page, and usually much less. The number of references should not exceed 10 for either the Correspondence or its Reply, and article titles are omitted from the reference list. Titles for correspondence are supplied by the editors.
+
+In cases where a correspondence is critical of a previous research paper, the authors are normally given the option of publishing a brief reply. Criticism of opinions or other secondary matter does not involve an automatic right of reply.
+
+Refutations are always peer reviewed. Other types of Correspondence may be peer reviewed at the editors' discretion.
+
+
+
+\subsection*{To the Editor:} Complex genomic analyses are carried out by
+combining simple operations like intersection, overlap and finding the nearest
+interval. Still, genomic analyses are often time-consuming and error-prone to
+write for the individual researcher as there are many details to get right. And
+the memory and speed performance is often low, as performance requires a deep
+understanding of lower-level aspects of programming. Low performance is annoying
+for a one-off script, but inefficient and wasteful of resources for published
+software that is run many times. And as genomic analyses are trivially
+parallelizeable per chromosome, genomic software should take advantage of this
+fact to produce a speedup equal to the time it takes to run the code on the
+longest chromosome.
+
+To this end, we have written the library PyRanges. PyRanges contains an
+efficient datastructure to represent genomic intervals and their associated
+metadata. PyRanges also contains efficient methods to operate on single
+intervals and compare pairs of intervals. Furthermore, PyRanges contains an
+extremely efficient run-length encoding library for arithmetic computations on
+the coverage (or any nucleotide-associated score) associated with one or more
+read libraries.
+
+PyRanges data are stored as Pandas DataFrames, which means that one can
+seamlessly use Pythons wealth of data science libraries on the data contained in
+PyRanges objects.
+
+PyRanges is not the only library that provides a datastructure with many methods
+for comparing intervals. In R, the library GenomicRanges provides the foundation
+for virtually all Genomics packages in the R BioConductor project. However, this
+library is slow for large datasets and is not automatically parallelized and
+thus do not meet the ideal requirements for genomics libraries. Furthermore, as
+Python is perhaps the most used programming language in the world and immensely
+popular in bioinformatics, we would expect PyRanges to be a large boon to the
+bioinformatics community even without the increased efficiency.
+
+
+
+
+
+
+
+\bibliography{library}
+
+\bibliographystyle{abbrv}
+
+\end{document}
