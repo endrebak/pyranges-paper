@@ -13,7 +13,7 @@ import platform
 if platform.system() == "Darwin":
     prefix = "/Users/endrebakkenstovner/large_data/pyranges_paper"
     iterations = [0] # range(10)
-    sizes = [int(f) for f in [1e6, 1e7]]
+    sizes = [int(f) for f in [1e5]] # , 1e6, 1e7]]
     libraries = "bioconductor pyranges_1 pyranges_2 pyranges_4 pybedtools".split()
 else:
     prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
@@ -70,7 +70,7 @@ rule all:
         chip_minus_input_files,
         intersection_files,
         overlap_files,
-        set_intersection_files,
+        # set_intersection_files,
         nearest_files,
         subtract_files
 

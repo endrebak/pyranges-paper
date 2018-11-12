@@ -6,9 +6,9 @@ f = snakemake@input[[1]]
 
 print("Reading data table")
 if (Sys.info()["sysname"] == "Darwin"){
-  cmd = paste0("gzcat ", fc, " | cut -f 1-3,6")
+  cmd = paste0("gzcat ", f, " | cut -f 1-3,6")
 } else {
-  cmd = paste0("zcat ", fc, " | cut -f 1-3,6")
+  cmd = paste0("zcat ", f, " | cut -f 1-3,6")
 }
 
 print(cmd)
