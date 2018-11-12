@@ -12,16 +12,16 @@ bg = BedTool(b)
 
 start = time()
 
-is_sorted = True if snakemake.wildcards.sorted == "sorted" else False
+# is_sorted = True if snakemake.wildcards.sorted == "sorted" else False
 
-if not is_sorted:
-    sc = chip.sort(stream=True).merge(s=True, c=[4, 5, 6], o="distinct")
-    sb = bg.sort(stream=True).merge(s=True, c=[4, 5, 6], o="distinct")
-else:
-    sc = chip.merge(s=True, c=[4, 5, 6], o="distinct")
-    sb = bg.merge(s=True, c=[4, 5, 6], o="distinct")
+# if not is_sorted:
+#     sc = chip.sort(stream=True).merge(s=True, c=[4, 5, 6], o="distinct")
+#     sb = bg.sort(stream=True).merge(s=True, c=[4, 5, 6], o="distinct")
+# else:
+sc = chip.merge(s=True, c=[4, 5, 6], o="distinct")
+sb = bg.merge(s=True, c=[4, 5, 6], o="distinct")
 
-result = sc.intersect(sb, s=True, sorted=is_sorted)
+result = sc.intersect(sb, s=True)
 
 end = time()
 

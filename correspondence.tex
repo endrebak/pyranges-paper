@@ -72,7 +72,7 @@
 % title goes here:
 \begin{flushleft}
 {\Large
-  \textbf\newline{pyranges: an efficient and flexible library for comparing genomic intervals}
+  \textbf\newline{pyranges: an efficient and flexible library for genomics in Python}
   % and arithmetic run length-encoding
 }
 \newline
@@ -99,25 +99,22 @@ and Nursing, Norwegian University of Science and Technology, Trondheim, Norway
 
 \end{flushleft}
 
-A Correspondence (formerly Letters to the Editor) is a flexible format that may include anything of interest to the journal's readers, from policy debates to announcements to 'matters arising' from research papers. A Correspondence may describe primary research data, but only in summary form; this format is not intended for full presentation of data. Correspondence should never be more than one printed page, and usually much less. The number of references should not exceed 10 for either the Correspondence or its Reply, and article titles are omitted from the reference list. Titles for correspondence are supplied by the editors.
+% A Correspondence (formerly Letters to the Editor) is a flexible format that may include anything of interest to the journal's readers, from policy debates to announcements to 'matters arising' from research papers. A Correspondence may describe primary research data, but only in summary form; this format is not intended for full presentation of data. Correspondence should never be more than one printed page, and usually much less. The number of references should not exceed 10 for either the Correspondence or its Reply, and article titles are omitted from the reference list. Titles for correspondence are supplied by the editors.
 
-In cases where a correspondence is critical of a previous research paper, the authors are normally given the option of publishing a brief reply. Criticism of opinions or other secondary matter does not involve an automatic right of reply.
+% In cases where a correspondence is critical of a previous research paper, the authors are normally given the option of publishing a brief reply. Criticism of opinions or other secondary matter does not involve an automatic right of reply.
 
-Refutations are always peer reviewed. Other types of Correspondence may be peer reviewed at the editors' discretion.
-
-
+% Refutations are always peer reviewed. Other types of Correspondence may be peer reviewed at the editors' discretion.
 
 \subsection*{To the Editor:} Complex genomic analyses are carried out by
-combining simple operations like intersection, overlap and finding the nearest
-interval. Still, genomic analyses are often time-consuming and error-prone to
-write for the individual researcher as there are many details to get right. And
-the memory and speed performance is often low, as performance requires a deep
-understanding of lower-level aspects of programming. Low performance is annoying
-for a one-off script, but inefficient and wasteful of resources for published
-software that is run many times. And as genomic analyses are trivially
-parallelizeable per chromosome, genomic software should take advantage of this
-fact to produce a speedup equal to the time it takes to run the code on the
-longest chromosome.
+combining simple operations like intersection, overlap and nearest. Still,
+genomic analyses are often time-consuming and error-prone to write for the
+individual researcher as there are many details to get right. And the memory and
+speed performance is often low, as performance requires a deep understanding of
+lower-level aspects of programming. Low performance is annoying for a one-off
+script, but inefficient and wasteful of resources for published software that is
+run many times. And as genomic analyses are trivially parallelizeable per
+chromosome, genomic software should take advantage of this fact to produce a
+speedup equal to the time it takes to run the code on the longest chromosome.
 
 To this end, we have written the library PyRanges. PyRanges contains an
 efficient datastructure to represent genomic intervals and their associated
@@ -138,10 +135,28 @@ library is slow for large datasets and is not automatically parallelized and
 thus do not meet the ideal requirements for genomics libraries. Furthermore, as
 Python is perhaps the most used programming language in the world and immensely
 popular in bioinformatics, we would expect PyRanges to be a large boon to the
-bioinformatics community even without the increased efficiency.
+bioinformatics community even without the increased efficiency. There is also a
+library called pybedtools that is a wrapper for the command line tool bedtools
+in Python.
 
+\subsection{Testing}
 
+To ensure correctness all PyRanges-functionality has been tested extensively
+using generative testing. Generative testing is a method that lets the computer
+use random processes to generate data. This ensures a much more thorough testing
+of the library than hand-written tests, possibly coming up with counter-examples
+no human would think of. Of course, to test that PyRanges produces the correct
+results, we need to know the correct results for any generated example data. For
+the PyRanges functionality have used bedtools as an oracle, and for the PyRle
+functionality, we used the Rle implementation from S4Vectors. Since these are
+long existing, much used libraries, we can be reasonably confident that if our
+library gave the same results, it was correct. This is especially true since our
+code is written independently of other libraries, without looking at their
+internals.
 
+Example of what this looks like?
+
+\subsection{API}
 
 
 

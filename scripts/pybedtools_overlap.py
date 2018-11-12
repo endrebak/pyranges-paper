@@ -11,12 +11,12 @@ bg = BedTool(b)
 
 start = time()
 
-is_sorted = True if snakemake.wildcards.sorted == "sorted" else False
+# is_sorted = True if snakemake.wildcards.sorted == "sorted" else False
 
-if is_sorted:
-    result = chip.intersect(bg, s=True, sorted=is_sorted, wa=True)
-else:
-    result = chip.intersect(bg, s=True, wa=True)
+# if is_sorted:
+#     result = chip.intersect(bg, s=True, sorted=is_sorted, wa=True)
+# else:
+result = chip.intersect(bg, s=True, wa=True)
 
 end = time()
 

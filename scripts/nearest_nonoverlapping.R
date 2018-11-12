@@ -5,10 +5,14 @@ library(data.table)
 fc = snakemake@input[["chip"]]
 fb = snakemake@input[["background"]]
 
+if (Sys.info()["sysname"] == "Darwin"){
+  cmd = paste0("gzcat ", fc, " | cut -f 1-3,6")
+  cmd_bg= paste0("gzcat ", fb, " | cut -f 1-3,6")
+} else {
+  cmd = paste0("zcat ", fc, " | cut -f 1-3,6")
+  cmd_bg= paste0("zcat ", fb, " | cut -f 1-3,6")
+}
 
-print("Reading data table")
-cmd = paste0("zcat ", fc, " | cut -f 1-3,6")
-cmd_bg= paste0("zcat ", fb, " | cut -f 1-3,6")
 print(cmd)
 chip_df = fread(cmd, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"), stringsAsFactors=TRUE)
 input_df = fread(cmd_bg, header=FALSE, col.names=c("Chromosome", "Start", "End", "Strand"), stringsAsFactors=TRUE)

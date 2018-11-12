@@ -11,12 +11,12 @@ bg = BedTool(b)
 
 start = time()
 
-is_sorted = True if snakemake.wildcards.sorted == "sorted" else False
+# is_sorted = True if snakemake.wildcards.sorted == "sorted" else False
 
-if is_sorted:
-    result = chip.subtract(bg, s=True, sorted=is_sorted)
-else:
-    result = chip.subtract(bg, s=True)
+# if is_sorted:
+#     result = chip.subtract(bg, s=True, sorted=is_sorted)
+# else:
+result = chip.subtract(bg, s=True)
 
 end = time()
 
