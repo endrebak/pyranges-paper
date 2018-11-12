@@ -39,14 +39,14 @@ wildcard_constraints:
     num_cores = regex([1, 2, 4, 8, 24, 48]),
     sorted = regex(sort)
 
-genomicranges_pyranges_only = "pyranges bioconductor".split()
+# genomicranges_pyranges_only = "pyranges bioconductor".split()
 
-bed_to_coverage_files = expand("{prefix}/benchmark/bed_to_coverage/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=genomicranges_pyranges_only, sorted=sort),
+bed_to_coverage_files = expand("{prefix}/benchmark/bed_to_coverage/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=no_pybedtools_libraries, sorted=sort),
 
 
 bed_to_granges_files = expand("{prefix}/benchmark/bed_to_granges/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=no_pybedtools_libraries, sorted=sort),
 
-chip_minus_input_files = expand("{prefix}/benchmark/chip_minus_input/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=genomicranges_pyranges_only, sorted=sort),
+chip_minus_input_files = expand("{prefix}/benchmark/chip_minus_input/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=no_pybedtools_libraries, sorted=sort),
 
 
 intersection_files = expand("{prefix}/benchmark/intersection/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
