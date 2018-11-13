@@ -1,5 +1,6 @@
 import pandas as pd
 
+import numpy as np
 # import ray
 # ray.init(num_cpus=2)
 
@@ -15,7 +16,8 @@ nrows = None
 
 chip = pd.read_table(chip_f, sep="\t", usecols=[0, 1, 2, 5], header=None, nrows=nrows,
                      names="Chromosome Start End Strand".split(),
-                     dtype={"Chromosome": "category", "Strand": "category"} )
+        dtype= {"Start": np.int32, "End": np.int32, "Chromosome": "category", "Strand": "category"})
+
 start_init = time()
 cgr = PyRanges(chip, copy_df=False)
 end_init = time()
@@ -24,7 +26,7 @@ print(end_init - start_init)
 
 background = pd.read_table(background_f, sep="\t", usecols=[0, 1, 2, 5], nrows=nrows,
                            header=None, names="Chromosome Start End Strand".split(),
-                           dtype={"Chromosome": "category", "Strand": "category"})
+        dtype= {"Start": np.int32, "End": np.int32, "Chromosome": "category", "Strand": "category"})
 
 start_init = time()
 bgr = PyRanges(background, copy_df=False)

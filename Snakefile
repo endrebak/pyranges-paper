@@ -12,8 +12,9 @@ import platform
 
 if platform.system() == "Darwin":
     prefix = "/Users/endrebakkenstovner/large_data/pyranges_paper"
-    iterations = [0] # range(10)
-    sizes = [int(f) for f in [1e5]] # , 1e6, 1e7]]
+    # iterations = [0] # range(10)
+    iterations = [1] # range(10)
+    sizes = [int(f) for f in [1e5, 1e6, 1e7]] # , 1e6, 1e7]]
     libraries = "bioconductor pyranges_1 pyranges_2 pyranges_4 pybedtools".split()
 else:
     prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
@@ -34,7 +35,7 @@ sort = ["sorted"]
 wildcard_constraints:
     chip = "(chip|input)", # regex(test_files.keys()),
     size = regex(sizes),
-    iteration = regex(iterations),
+    # iteration = regex(iterations),
     libraries = regex(libraries),
     num_cores = regex([1, 2, 4, 8, 24, 48]),
     sorted = regex(sort)

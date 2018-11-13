@@ -1,4 +1,5 @@
 
+import numpy as np
 import pandas as pd
 
 import ray
@@ -21,7 +22,7 @@ background_f = snakemake.input.background
 start_init = time()
 chip = pd.read_table(chip_f, sep="\t",
                      usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split(), engine="c",
-                     dtype={"Chromosome": "category", "Strand": "category"} )
+                     dtype={"Chromosome": "category", "Strand": "category", "Start": np.int32, "End": np.int32} )
 end_init = time()
 print("read_time", end_init - start_init)
 
@@ -34,7 +35,7 @@ print(end_init - start_init)
 start_init = time()
 background = pd.read_table(background_f, sep="\t",
                            usecols=[0, 1, 2, 5], header=None, names="Chromosome Start End Strand".split(), engine="c",
-                     dtype={"Chromosome": "category", "Strand": "category"} )
+                     dtype={"Chromosome": "category", "Strand": "category", "Start": np.int32, "End": np.int32} )
 
 end_init = time()
 print("read_time", end_init - start_init)

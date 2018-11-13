@@ -23,8 +23,8 @@ input = GRanges(seqnames = input_df$Chromosome, ranges = IRanges(start = input_d
 print("intersecting")
 
 start.time <- Sys.time()
-pairs = findOverlapPairs(chip, input, ignore.strand = TRUE)
-result = pintersect(pairs)
+result = findOverlaps(chip, input, ignore.strand = FALSE, select="first")
+## result = pintersect(pairs)
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time
