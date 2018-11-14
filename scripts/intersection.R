@@ -33,7 +33,6 @@ time.taken <- end.time - start.time
 
 time.taken <- as.numeric(time.taken, units="secs")
 
-print(result)
 
 write(time.taken, file=snakemake@output[["time"]])
 

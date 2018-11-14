@@ -1,4 +1,12 @@
 import pandas as pd
+
+num_cores = int(snakemake.wildcards.num_cores)
+import ray
+if num_cores != 1:
+    ray.init(num_cpus=num_cores)
+else:
+    ray.init(local_mode=True, num_cpus=1) # logging_level=logging.CRITICAL # local_mode=True
+
 from pyranges import PyRanges
 
 import numpy as np

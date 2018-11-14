@@ -8,7 +8,7 @@ num_cores = int(snakemake.wildcards.num_cores)
 if num_cores != 1:
     ray.init(num_cpus=num_cores)
 else:
-    ray.init(local_mode=True) # logging_level=logging.CRITICAL # local_mode=True
+    ray.init(local_mode=True, num_cpus=1) # logging_level=logging.CRITICAL # local_mode=True
 
 
 from pyranges import PyRanges

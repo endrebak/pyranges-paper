@@ -1,6 +1,15 @@
 
 import numpy as np
 import pandas as pd
+
+import ray
+num_cores = int(snakemake.wildcards.num_cores)
+if num_cores != 1:
+    ray.init(num_cpus=num_cores)
+else:
+    ray.init(local_mode=True, num_cpus=1) # logging_level=logging.CRITICAL # local_mode=True
+
+
 from pyranges import PyRanges
 
 from time import time

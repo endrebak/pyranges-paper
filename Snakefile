@@ -15,12 +15,14 @@ if platform.system() == "Darwin":
     # iterations = [0] # range(10)
     iterations = [1] # range(10)
     sizes = [int(f) for f in [1e5, 1e6, 1e7]] # , 1e6, 1e7]]
+    pybedtool_sizes = [int(f) for f in [1e5, 1e6, 1e7]] # , 1e6, 1e7]]
     libraries = "bioconductor pyranges_1 pyranges_2 pyranges_4 pybedtools".split()
 else:
     prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
-    iterations = range(10)
-    libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48 pybedtools".split()
-    sizes = [int(f) for f in [1e6, 1e7, 1e8, 1e9, 1e10]]
+    iterations = range(3)
+    libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48".split()
+    sizes = [int(f) for f in [1e6, 1e7, 1e8]] #, 1e9, 1e10]]
+    pybedtool_sizes = [int(f) for f in [1e6, 1e7]] #, 1e9, 1e10]]
 
 
 no_pybedtools_libraries = "bioconductor pyranges_1 pyranges_2 pyranges_4".split()
@@ -35,12 +37,13 @@ sort = ["sorted"]
 wildcard_constraints:
     chip = "(chip|input)", # regex(test_files.keys()),
     size = regex(sizes),
-    # iteration = regex(iterations),
+    iteration = regex(iterations),
     libraries = regex(libraries),
     num_cores = regex([1, 2, 4, 8, 24, 48]),
     sorted = regex(sort)
 
 # genomicranges_pyranges_only = "pyranges bioconductor".split()
+
 
 bed_to_coverage_files = expand("{prefix}/benchmark/bed_to_coverage/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=no_pybedtools_libraries, sorted=sort),
 
@@ -51,14 +54,19 @@ chip_minus_input_files = expand("{prefix}/benchmark/chip_minus_input/{library}/{
 
 
 intersection_files = expand("{prefix}/benchmark/intersection/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
+intersection_files_pybedtools = expand("{prefix}/benchmark/intersection/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=pybedtool_sizes, library="pybedtools", sorted=sort)
 
 overlap_files = expand("{prefix}/benchmark/overlap/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
+overlap_files_pybedtools = expand("{prefix}/benchmark/overlap/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=pybedtool_sizes, library="pybedtools", sorted=sort)
 
 set_intersection_files = expand("{prefix}/benchmark/set_intersection/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
+set_intersection_files_pybedtools = expand("{prefix}/benchmark/set_intersection/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=pybedtool_sizes, library="pybedtools", sorted=sort)
 
 nearest_files = expand("{prefix}/benchmark/nearest{type}/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort, type=["", "_nonoverlapping"])
+nearest_files_pybedtools = expand("{prefix}/benchmark/nearest{type}/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=pybedtool_sizes, library="pybedtools", sorted=sort, type=["", "_nonoverlapping"])
 
 subtract_files = expand("{prefix}/benchmark/subtract/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
+subtract_files_pybedtools = expand("{prefix}/benchmark/subtract/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=pybedtool_sizes, library="pybedtools", sorted=sort)
 
 
 graph_files = [f"{prefix}/benchmark/graphs/time.pdf", f"{prefix}/benchmark/graphs/memory.pdf"]
@@ -70,10 +78,15 @@ rule all:
         bed_to_coverage_files,
         chip_minus_input_files,
         intersection_files,
+        intersection_files_pybedtools,
         overlap_files,
-        # set_intersection_files,
+        overlap_files_pybedtools,
+        set_intersection_files,
+        set_intersection_files_pybedtools,
         nearest_files,
-        subtract_files
+        nearest_files_pybedtools,
+        subtract_files,
+        subtract_files_pybedtools
 
 
 rule graphs:
@@ -137,7 +150,6 @@ rule pyranges_bed_to_coverage:
         "{prefix}/data/download/chip_{size}.bed.gz"
     output:
         timing = "{prefix}/benchmark/bed_to_coverage/pyranges_{num_cores}/{iteration}_{size}_time.txt",
-        preview = "{prefix}/benchmark/bed_to_coverage/pyranges_{num_cores}/{iteration}_{size}_preview.txt"
     benchmark:
         "{prefix}/benchmark/bed_to_coverage/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
     threads:
