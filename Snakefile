@@ -68,25 +68,16 @@ nearest_files_pybedtools = expand("{prefix}/benchmark/nearest{type}/{library}/{i
 subtract_files = expand("{prefix}/benchmark/subtract/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=sizes, library=libraries, sorted=sort)
 subtract_files_pybedtools = expand("{prefix}/benchmark/subtract/{library}/{iteration}_{size}_time.txt", prefix=prefix, iteration=iterations, size=pybedtool_sizes, library="pybedtools", sorted=sort)
 
+all_files = [bed_to_granges_files, bed_to_coverage_files, chip_minus_input_files, intersection_files, intersection_files_pybedtools, overlap_files, overlap_files_pybedtools, set_intersection_files, set_intersection_files_pybedtools, nearest_files, nearest_files_pybedtools, subtract_files, subtract_files_pybedtools]
 
 graph_files = [f"{prefix}/benchmark/graphs/time.pdf", f"{prefix}/benchmark/graphs/memory.pdf"]
 
-
 rule all:
     input:
-        bed_to_granges_files,
-        bed_to_coverage_files,
-        chip_minus_input_files,
-        intersection_files,
-        intersection_files_pybedtools,
-        overlap_files,
-        overlap_files_pybedtools,
-        set_intersection_files,
-        set_intersection_files_pybedtools,
-        nearest_files,
-        nearest_files_pybedtools,
-        subtract_files,
-        subtract_files_pybedtools
+        all_files,
+        f"{prefix}/benchmark/graphs/time.pdf",
+        # f"{prefix}/benchmark/graphs/memory.pdf"
+
 
 
 rule graphs:
@@ -502,37 +493,52 @@ rule bioconductor_nearest_nonoverlapping:
 
 rule collect_times:
     input:
-        bed_to_coverage_files, chip_minus_input_files, set_intersection_files, nearest_files, intersection_files, subtract_files
+        all_files
     output:
         f"{prefix}/benchmark/collected_timings.txt"
     run:
         rowdicts = []
         for f in input:
+            # print(f)
             bmark_f = f.replace("time.txt", "benchmark.txt")
             function, library, timingfile = f.split("/")[-3:]
             iteration, size = timingfile.split("_")[:2]
+            size = int(size)
+            print(function, library, timingfile )
+            print(iteration, size)
 
             timing = open(f).readlines()[0].strip()
 
-            if library in ["pyranges", "pybedtools"]:
+            if "pyranges_" in library or library == "pybedtools":
                 minutes, seconds, fraction = timing.split(".")
                 minutes, seconds = int(minutes), int(seconds)
                 seconds += minutes * 60
 
                 timing = ".".join(str(s) for s in [seconds, fraction])
 
-            max_rss = pd.read_table(bmark_f, sep="\t", usecols=[2], skiprows=1, squeeze=True, header=None).values[0] / 1024
+            try:
+                max_rss = pd.read_table(bmark_f, sep="\t", usecols=[2], skiprows=1, squeeze=True, header=None).values[0] / 1024
 
-            rowdict = {"Iteration": iteration, "MaxRSSGB": max_rss,
-                       "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
-                       np.log10(size)}
+                rowdict = {"Iteration": iteration, "MaxRSSGB": max_rss,
+                        "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
+                        np.log10(size)}
+            except:
+                rowdict = {"Iteration": iteration, "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
+                           np.log10(size)}
+
 
             rowdicts.append(rowdict)
 
-        df = pd.DataFrame.from_dict(rowdicts).sort_values("Function Library NBIntervals".split())
-        column_order = "Function Library NBIntervals MaxRSSGB Seconds Iteration".split()
+        df = pd.DataFrame.from_dict(rowdicts)
+        print(df.head())
+        df = df.sort_values("Function Library Log10NBIntervals".split())
 
-        df[column_order].to_csv(output[0], index=False, sep="\t")
+        try:
+            column_order = "Function Library Log10NBIntervals MaxRSSGB Seconds Iteration".split()
+            df[column_order].to_csv(output[0], index=False, sep="\t")
+        except:
+            column_order = "Function Library Log10NBIntervals Seconds Iteration".split()
+            df[column_order].to_csv(output[0], index=False, sep="\t")
 
 
 rule graph_results:
