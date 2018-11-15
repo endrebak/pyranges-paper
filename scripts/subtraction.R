@@ -23,7 +23,7 @@ input = GRanges(seqnames = input_df$Chromosome, ranges = IRanges(start = input_d
 print("intersecting")
 
 start.time <- Sys.time()
-result = psetdiff(chip, input)
+result = psetdiff(chip, input, ignore.strand=FALSE)
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time
