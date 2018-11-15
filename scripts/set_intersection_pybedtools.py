@@ -18,8 +18,8 @@ start = time()
 #     sc = chip.sort(stream=True).merge(s=True, c=[4, 5, 6], o="distinct")
 #     sb = bg.sort(stream=True).merge(s=True, c=[4, 5, 6], o="distinct")
 # else:
-sc = chip.merge(s=True, c=[4, 5, 6], o="distinct")
-sb = bg.merge(s=True, c=[4, 5, 6], o="distinct")
+sc = chip.sort().merge(s=True, c=[4, 5, 6], o="distinct")
+sb = bg.sort().merge(s=True, c=[4, 5, 6], o="distinct")
 
 result = sc.intersect(sb, s=True)
 
