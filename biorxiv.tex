@@ -105,9 +105,9 @@ and Nursing, Norwegian University of Science and Technology, Trondheim, Norway
 simple operations like intersection, overlap and nearest. To this end, we have
 written PyRanges, a datastructure for representing and manipulating genomic
 intervals and their associated data in Python. It is directly compatible with,
-and therefore a welcome extension to, Python's wealth of data science libraries.
-Our benchmarks show that on average PyRanges is 30 times faster and uses 50
-percent of the memory of the popular R GenomicRanges library.
+and a welcome addition to, Python's wealth of data science libraries. Our
+benchmarks show that on average PyRanges is 30 times faster and uses 50 percent
+of the memory of the popular R GenomicRanges library.
 
 \textbf{Availability and Implementation:} PyRanges is available open-source under
 the MIT license at https://github.com/endrebak/pyranges and documentation exists
@@ -138,10 +138,10 @@ computational resources needed. Time usage can be reduced by leveraging a
 beneficial property of genomic operations, namely that they are trivially
 parallelizeable, as each operation is performed per chromosome. Using this fact
 genomic software can produce a speedup equal to the time it takes to run the
-code on the longest chromosome. This all means that genomic analyses are hard to
-write, as they require the programmer to understand software parallelism and
-lower-level aspects of programming to write operations with the desired
-efficiency.
+code on the longest chromosome (or even better, chromosome/strand pair). This
+all means that genomic analyses are hard to write, as they require the
+programmer to understand software parallelism and lower-level aspects of
+programming to write operations with the desired efficiency.
 
 For this reason several toolboxes of genome operations exist, both for the
 command line and programming environments.
@@ -167,31 +167,44 @@ Conspicuouly missing from the list of languages with a GenomicRanges
 implementation is Python. The Python language is perhaps the most used in the
 world, and extremely popular in data science and bioinformatics, yet it lacks a
 GenomicRanges implementation. The PyRanges library remedies this by providing an
-implementation which is much faster and more memory-efficient than the existing
-alternatives and is the first fully multi-threaded genomic toolbox.
+implementation which is at least an order of magnitude faster, 50 percent more
+memory-efficient than the existing alternatives and is the first fully
+multi-threaded genomic toolbox.
 
-\section*{Methods}
+\section*{Library}
 
+The main feature of the PyRanges library is the PyRanges datastructure, a
+2D-table where each row represents an interval, and each column describes part
+of the location of the interval (chromosome, start position, end position, and
+optionally, strand) or some aspect of its metadata (name, score, exon number or
+any arbitrary value chosen by the user).
 
+PyRanges objects are instantiated by creating them from regular Python objects,
+Pandas DataFrames or reading common bioinformatics file formats such as bed, bam
+or GTF/GFF. The location-related aspects are represented as compactly as
+possible, using 32-bit unsigned integers for the starts and ends, an 8-bit
+int categorical for the strand and an 8-bit int categorical for the chromosome
+(or 16-bit, if the number of chromosomes is above 256). There is also a flag
+which allows creating extended dataframes, where the starts and ends are stored
+as 64-bit ints).
 
-PyRanges is a thin wrapper around genomic data contained in Pandas
-\cite{mckinney-proc-scipy-2010} dataframes. This allows one to directly use
-Python's wealth of libraries for scientific computing and plotting such as
-SciPy, NumPy, scikit-learn, matplotlib and seaborn \cite{scipy},
-\cite{oliphant-2006-guide}, \cite{scikit-learn}, \cite{Hunter:2007},
-\cite{michael_waskom_2017_883859} on the data in PyRanges objects. However, the
-PyRanges object is extended with many methods for subsetting and modifying it,
-and for doing comparisons and queries with pairs of PyRanges. The most important
-are shown in table \ref{tab1}. PyRanges includes readers for common file formats
-in bioinformatics such as bed, bam and gtf. PyRanges also contains coverage
-methods, which allows one to represent and do arithmetic on the coverage (or
-some other numeric score associated with each nucleotide) in an extremely
-efficient manner. The coverage is stored as run length encodings in an object
-called PyRles.
+The library provides operations for modifying single PyRanges and for comparing
+pairs of PyRanges (listed in table\ref{tab1} and table\ref{tab2}, respectively).
 
-\section*{Functionality}
-
-% TODO: find way to group
+\begin{table}[!ht]
+\begin{adjustwidth}{-1.5in}{0in}
+\centering
+\caption{{\bf Functionality.} Methods for manipulating/converting single PyRanges.}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+  {\bf Method} & {\bf Purpose} \\ \hline
+  Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
+  Cluster & Merge the overlapping features in a PyRanges object \\ \hline
+  Coverage & Create a dictionary of run length encodings from the PyRanges object \\ \hline
+\end{tabular}
+\label{tab1}
+\end{adjustwidth}
+\end{table}
 
 \begin{table}[!ht]
 \begin{adjustwidth}{-1.5in}{0in}
@@ -200,7 +213,6 @@ called PyRles.
 \begin{tabular}{|l|l|l|l|l|l|l|}
 \hline
   {\bf Method} & {\bf Purpose} \\ \hline
-  Subset & Use Python's getitem operator to efficiently subset PyRanges \\ \hline
   Intersection & For each feature in self, keep those that overlap with intervals in other \footnotemark \\ \hline
   Set Intersection & Treat the intervals in each PyRanges as a set and find the intersection \footnotemark \\ \hline
   Overlap & Keep each feature in self that overlaps with at least one in other \\ \hline
@@ -208,22 +220,47 @@ called PyRles.
   Subtract & For each feature in self, keep those parts that do not overlap with any feature in other \\ \hline
   Set Subtract & Treat the intervals in each PyRanges as a set and subtract other from self \\ \hline
   Nearest & For each feature in self, find the nearest in other \\ \hline
-  Cluster & Merge the overlapping features in a PyRanges object \\ \hline
-  Coverage & Create a dictionary of run length encodings from the PyRanges object \\ \hline
 \end{tabular}
-\label{tab1}
+\label{tab2}
 \end{adjustwidth}
 \end{table}
 \footnotetext{Like bedtools intersect}
 \footnotetext{Like BioConductor GenomicRanges intersect}
 
+Additionally, PyRanges provides a run-length encoding (RLE) datastructure for
+compactly representing the coverage (or any nucleotide-associated score)
+associated with one or more PyRanges. A run length encoding is a way to compress
+continuous stretches of data to two values, namely a run length and a value. As
+an example, 11100111100 can be represented as [3, 2, 4, 2], [1, 0, 1, 0]. The
+arithmetic operations +, -, / and * are implemented for the RLEs, all producing
+new RLEs. This enables nucleotide-level computations and comparisons of coverage
+or scores from pairs of interval collections, even though they cover genomes
+spanning billions of nucleotides.
 
-\subsection*{Implementation}
+\section*{Implementation}
 
-PyRanges are stored in Pandas DataFrames, which are 2-D, mutable representations
-of data. To allow for range-queries and operations that uses such, the genomic
-intervals are stored in a nested containment list, originally implemented in the
-PyGr library \cite{doi:10.1093/bioinformatics/btl647}.
+To store the intervals and associated metadata, Pandas dataframes are used.
+Pandas dataframes are labeled 2D tables, where each column is stored as a
+contiguous array of a low-level datatype (i.e. int, uint32, float64) or pointers
+to Python objects. The data associated with each chromosome/strand pair are kept
+in their own dataframe, so that the table of genomic data does not need to be
+split or combined after distributing the data to different cores for parallel
+processing (this division is invisible to the end-user however).
+
+Multithreading is achieved by using the Ray library to distribute jobs on
+different cores for asynchronous computation \cite{}.
+
+PyRanges uses the Nested Containment
+List\cite{doi:10.1093/bioinformatics/btl647} (NCLS) for operations involving
+nucleotide overlap. The NCLS is a tree-like structure for performing interval
+queries. It works by sorting an array of intervals into one main list and then
+(possibly) several sublists, where each list upholds the property that no
+interval in the list is purely contained in another. This allows for binary
+searches in each list, and it has the nice property that as the first
+overlapping interval is found, the rest can be retrieved by simple linear
+iteration.
+
+The Nested Containment List used ..
 
 \section*{Performance}
 
@@ -243,13 +280,13 @@ matches the speed of the R and Python GenomicRanges-implementations as it can
 use the extremely efficient sweep algorithm. For most other algorithms we see
 that it uses a lot more time, however.
 
-\begin{figure}
-% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
-\includegraphics[width=1\textwidth]{graphs/time.pdf}
-% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
-\caption{Time in seconds: PyRanges vs. GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
-\label{fig1} % use \ref{fig1} to reference to this figure
-\end{figure} % avoid blank space here
+% \begin{figure}
+% % the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
+% \includegraphics[width=1\textwidth]{graphs/time.pdf}
+% % \captionsetup{labelformat=empty} % makes sure dummy caption is blank
+% \caption{Time in seconds: PyRanges vs. GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
+% \label{fig1} % use \ref{fig1} to reference to this figure
+% \end{figure} % avoid blank space here
 
 \subsection*{Memory usage}
 
@@ -265,22 +302,17 @@ than R GenomicRanges. There is some variability in the memory usage, which is to
 be expected for garbage collected languages. We see that pybedtools is extremely
 memory-efficient for many operations.
 
-\begin{figure}
-% the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
-\includegraphics[width=1\textwidth]{graphs/memory.pdf}
-% \captionsetup{labelformat=empty} % makes sure dummy caption is blank
-\caption{Memory usage in GigaBytes: PyRanges vs GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
-\label{fig2} % use \ref{fig1} to reference to this figure
-\end{figure} % avoid blank space here
+% \begin{figure}
+% % the number in [] of wrapfigure is optional and gives the number of text lines that should be wrapped around the text. Adjust according to your figures height
+% \includegraphics[width=1\textwidth]{graphs/memory.pdf}
+% % \captionsetup{labelformat=empty} % makes sure dummy caption is blank
+% \caption{Memory usage in GigaBytes: PyRanges vs GenomicRanges} % add dummy caption - otherwise \label won't work and figure numbering will not count up
+% \label{fig2} % use \ref{fig1} to reference to this figure
+% \end{figure} % avoid blank space here
 
 \section*{Discussion}
 
-PyRanges works well with the existing Python data science libraries yet extends
-them with high-performance functionality for genomic analyses. As such we
-believe it will be useful for everything from simplifying one-off analysis
-scripts to providing a foundation for bioinformatics libraries written in
-Python.
-
+Comparison
 
 \bibliography{library}
 
