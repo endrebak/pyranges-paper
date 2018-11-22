@@ -1,10 +1,18 @@
 library(ggplot2)
+library(gtools)
 
-df = read.table(snakemake@input[[1]], header=1)
+
+df = read.table(snakemake@input[[1]], header=1, stringsAsFactors=FALSE)
 
 ## df$NBIntervals = as.factor(df$NBIntervals)
+## df$Library = as.factor(df$Library, mixedsort(df$Library))
+df$Library = factor(df$Library, levels=mixedsort(unique(df$Library)))
 print(head(df))
 
-p = ggplot(data=df, aes(x=Log10NBIntervals, y=Seconds, color=Library)) + geom_point() +  geom_line() + facet_wrap(~Function) + ggtitle("Time usage: PyRanges vs. R GenomicRanges") + xlab("Number of intervals in millions") + ylab("Time in seconds")
+p = ggplot(data=df, aes(x=Log10NBIntervals, y=Seconds, color=Library)) + geom_line() + facet_wrap(~Function) + ggtitle("Time usage: PyRanges vs. R GenomicRanges") + xlab("Log10 nb intervals") + ylab("Log10 seconds")
 
-ggsave(snakemake@output[[1]], p)
+if (snakemake@wildcards["subset"] == "_subset"){
+  ggsave(snakemake@output[[1]], p, height=5, width=5)
+} else {
+  ggsave(snakemake@output[[1]], p)
+  }

@@ -1,9 +1,19 @@
 library(ggplot2)
 
-df = read.table(snakemake@input[[1]], header=1)
 
-## df$NBIntervals = as.factor(df$NBIntervals)
+library(gtools)
+df = read.table(snakemake@input[[1]], header=1, stringsAsFactors=FALSE)
 
-p = ggplot(data=df, aes(x=NBIntervals, y=MaxRSSGB, color=Library)) + geom_point() + geom_smooth(method=lm) + facet_wrap(~Function) + ggtitle("Memory usage: PyRanges vs. R GenomicRanges") + xlab("Number of intervals in millions") + ylab("GB")
+## df$Library = as.factor(df$Library, labels=mixedsort(df$Library))
+print(mixedsort(unique(df$Library)))
+df$Library = factor(df$Library, labels=mixedsort(unique(df$Library)))
 
-ggsave(snakemake@output[[1]], p)
+p = ggplot(data=df, aes(x=Log10NBIntervals, y=MaxRSSGB, color=Library)) + geom_line() + facet_wrap(~Function) + ggtitle("Memory usage: PyRanges vs. R GenomicRanges") + xlab("Log10 nb intervals") + ylab("GB")
+
+
+if (snakemake@wildcards["subset"] == "_subset"){
+  ggsave(snakemake@output[[1]], p, height=5, width=5)
+
+} else {
+  ggsave(snakemake@output[[1]], p)
+  }

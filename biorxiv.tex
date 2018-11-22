@@ -101,10 +101,13 @@ and Nursing, Norwegian University of Science and Technology, Trondheim, Norway
 
 \section*{Abstract}
 
-\textbf{Summary:} PyRanges is a high-performance datastructure for representing
-and manipulating genomic intervals and their associated data in Python. It is
-directly compatible with Python's wealth of data science libraries and is
-therefore well suited for genomic analyses.
+\textbf{Summary:} Complex genomic analyses are carried out by a sequence of
+simple operations like intersection, overlap and nearest. To this end, we have
+written PyRanges, a datastructure for representing and manipulating genomic
+intervals and their associated data in Python. It is directly compatible with,
+and therefore a welcome extension to, Python's wealth of data science libraries.
+Our benchmarks show that on average PyRanges is 30 times faster and uses 50
+percent of the memory of the popular R GenomicRanges library.
 
 \textbf{Availability and Implementation:} PyRanges is available open-source under
 the MIT license at https://github.com/endrebak/pyranges and documentation exists
@@ -114,30 +117,62 @@ at https://endrebak.github.io/pyranges/
 
 \section*{Introduction}
 
+Comparing sets of intervals ('genome arithmetic') is a fundamental task in
+genomics, and a few basic operations allow for answering many scientific
+questions. As a simple example, to find which genes a transcription factor binds
+to, the collection of intervals representing the positions of the genes and the
+collection representing the aligned positions of the transcription factor can be
+\textit{overlapped}. The overlap operation takes two collections of intervals
+and reports all intervals from the first collection which shares at least a part
+of its position with an interval from the second. For the remainder of the
+transcription factor alignments which did not overlap any genes, one can use the
+operation \textit{nearest} to find the genes with the shortest nucleotide
+distance to them. Of course, a complete genomic analysis will often require
+additional custom manipulation of data, which can be achieved by programming.
 
-Comparing sets of intervals is a fundamental task in genomics, and a few basic
-operations allow for answering complex questions. Several popular command
-line tools for this purpose exist, like bedtools
-\cite{doi:10.1093/bioinformatics/btq033} and bedops
-\cite{doi:10.1093/bioinformatics/bts277}. There is also a wrapper for bedtools
-which allows easy use from Python \cite{doi:10.1093/bioinformatics/btr539}.
+Genomics datasets can be large - alignment files can contain hundreds of
+millions of entries, which means that software for performing genome arithmetic
+need to find a compact representation of the data and that the operations should
+be fast, otherwise many problems become intractable due to the excessive time or
+computational resources needed. Time usage can be reduced by leveraging a
+beneficial property of genomic operations, namely that they are trivially
+parallelizeable, as each operation is performed per chromosome. Using this fact
+genomic software can produce a speedup equal to the time it takes to run the
+code on the longest chromosome. This all means that genomic analyses are hard to
+write, as they require the programmer to understand software parallelism and
+lower-level aspects of programming to write operations with the desired
+efficiency.
 
-Since comparing sets of intervals is such a fundamental task, the datastructure
-GenomicRanges for efficiently representing and operating on genomic intervals
-was invented. This datastructure removes the need for library authors to come up
-with their own custom, slow and hard to maintain solutions and allows them to
-immediately begin solving their problem of interest. Indeed, in R, the
-foundational GenomicRanges library \cite{10.1371/journal.pcbi.1003118} is used
-for interval comparisons, and it is a cornerstone of genomics packages in the R
-BioConductor \cite{Gentleman2004} project. The new Julia language
-\cite{doi:10.1137/141000671} also has a package for GenomicRanges
+For this reason several toolboxes of genome operations exist, both for the
+command line and programming environments.
+
+For the command line bedtools \cite{doi:10.1093/bioinformatics/btq033} and
+bedops \cite{doi:10.1093/bioinformatics/bts277} exist. There is also a wrapper
+for bedtools which allows easy use from Python
+\cite{doi:10.1093/bioinformatics/btr539}. These allow for performing operations
+on files of intervals, which means that each sequence of operations starts with
+reading and ends with storing the result on disk.
+
+Since comparing sets of intervals is a fundamental task, the datastructure
+GenomicRanges\cite{10.1371/journal.pcbi.1003118} for representing and operating
+on genomic intervals was invented. This datastructure stores collections of
+intervals and their metadata as a 2D-table in memory, and allows for
+manipulating them from the comfort of ones programming environment. Indeed, in
+R, GenomicRanges is a foundational library, and a cornerstone of genomics
+packages in the R BioConductor \cite{Gentleman2004} project. The new Julia
+language \cite{doi:10.1137/141000671} also has a package for GenomicRanges
 \cite{Haverty2017}.
 
-Python is the fourth largest programming language in the world, the largest
-scripting language, and it is widely used in bioinformatics, yet Python lacks a
-GenomicRanges implementation. The PyRanges library remedies this.
+Conspicuouly missing from the list of languages with a GenomicRanges
+implementation is Python. The Python language is perhaps the most used in the
+world, and extremely popular in data science and bioinformatics, yet it lacks a
+GenomicRanges implementation. The PyRanges library remedies this by providing an
+implementation which is much faster and more memory-efficient than the existing
+alternatives and is the first fully multi-threaded genomic toolbox.
 
 \section*{Methods}
+
+
 
 PyRanges is a thin wrapper around genomic data contained in Pandas
 \cite{mckinney-proc-scipy-2010} dataframes. This allows one to directly use

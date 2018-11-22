@@ -40,7 +40,8 @@ wildcard_constraints:
     iteration = regex(iterations),
     libraries = regex(libraries),
     num_cores = regex([1, 2, 4, 8, 24, 48]),
-    sorted = regex(sort)
+    sorted = regex(sort),
+    # subset = "(''|_subset)"
 
 # genomicranges_pyranges_only = "pyranges bioconductor".split()
 
@@ -75,7 +76,7 @@ graph_files = [f"{prefix}/benchmark/graphs/time.pdf", f"{prefix}/benchmark/graph
 rule all:
     input:
         all_files,
-        f"{prefix}/benchmark/graphs/time.pdf",
+        expand("{prefix}/benchmark/graphs/time.pdf", prefix=prefix)
         # f"{prefix}/benchmark/graphs/memory.pdf"
 
 
@@ -516,12 +517,14 @@ rule collect_times:
 
                 timing = ".".join(str(s) for s in [seconds, fraction])
 
+            timing = np.log10(float(timing))
             try:
                 max_rss = pd.read_table(bmark_f, sep="\t", usecols=[2], skiprows=1, squeeze=True, header=None).values[0] / 1024
 
                 rowdict = {"Iteration": iteration, "MaxRSSGB": max_rss,
-                        "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
-                        np.log10(size)}
+                           "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
+                           np.log10(size)}
+            # because maxrssgb does not work on macOS
             except:
                 rowdict = {"Iteration": iteration, "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
                            np.log10(size)}
@@ -539,6 +542,17 @@ rule collect_times:
         except:
             column_order = "Function Library Log10NBIntervals Seconds Iteration".split()
             df[column_order].to_csv(output[0], index=False, sep="\t")
+
+
+rule subset:
+    input:
+        "{prefix}/benchmark/collected_timings.txt"
+    output:
+        "{prefix}/benchmark/collected_timings{subset}.txt"
+    shell:
+        "head -1 {input[0]} > {output[0]}; grep -wP '(intersection|nearest_nonoverlapping|overlap)' {input[0]} | grep -wP '(bioconductor|pyranges_1|pyranges_8|pyranges_48)' >> {output[0]}"
+
+
 
 
 rule graph_results:
