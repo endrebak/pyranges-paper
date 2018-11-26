@@ -102,13 +102,13 @@ and Nursing, Norwegian University of Science and Technology, Trondheim, Norway
 \section*{Abstract}
 
 \textbf{Summary:} Complex genomic analyses are carried out by a sequence of
-simple operations like intersection, overlap and nearest. So a toolbox of common
-genomic operations enables a wide range of analyses to be performed. To this
-end, we have written PyRanges, a datastructure for representing and manipulating
-genomic intervals and their associated data in Python. It is directly compatible
-with Python's wealth of data science libraries. Our benchmarks show that on
-average PyRanges is 30 times faster and uses 50 percent of the memory of the
-popular R GenomicRanges library.
+simple operations like intersection, overlap and nearest. So a toolbox of these
+operations enables a wide range of analyses to be performed. To this end, we
+have written PyRanges, a datastructure for representing and manipulating genomic
+intervals and their associated data in Python. It is directly compatible with
+Python's wealth of data science libraries. Our benchmarks show that on average
+PyRanges is 30 times faster and uses 50 percent of the memory of the popular R
+GenomicRanges library.
 
 \textbf{Availability and Implementation:} PyRanges is available open-source under
 the MIT license at https://github.com/endrebak/pyranges and documentation exists
@@ -147,13 +147,12 @@ programming to write operations with the desired efficiency.
 Several toolboxes of genomic operations exist, both for the command line and
 programming environments.
 
-For the command line, the most used alternatives are bedtools
-\cite{doi:10.1093/bioinformatics/btq033} and bedops
-\cite{doi:10.1093/bioinformatics/bts277}. There is also a wrapper for bedtools
+For the command line, the most used alternative is bedtools
+\cite{doi:10.1093/bioinformatics/btq033}. It allows for performing operations on
+common bioinformatics file formats, which means that each sequence of operations
+starts and ends with I/O. It works by streaming the data and evicting it from
+memory as soon as it is not needed anymore. There is also a wrapper for bedtools
 which allows easy use from Python \cite{doi:10.1093/bioinformatics/btr539}.
-These allow for performing operations on files of intervals, which means that
-each sequence of operations starts with reading and ends with storing the result
-on disk.
 
 Since comparing sets of intervals is a fundamental task, the datastructure
 GenomicRanges\cite{10.1371/journal.pcbi.1003118} for representing and operating
@@ -167,19 +166,71 @@ language \cite{doi:10.1137/141000671} also has a package for GenomicRanges
 
 Conspicuouly missing from the list of languages with a GenomicRanges
 implementation is Python. The Python language is perhaps the most used in the
-world, and extremely popular in data science and bioinformatics, yet it lacks a
-GenomicRanges implementation. The PyRanges library remedies this by providing an
-implementation which is at least an order of magnitude faster and 50 percent
-more memory-efficient than the existing alternatives and is the first fully
-multi-threaded genomic toolbox.
+world\footnotemark, and extremely popular in data science and bioinformatics,
+yet it lacks a GenomicRanges implementation. The PyRanges library remedies this
+by providing an implementation which is at least an order of magnitude faster
+and 50 percent more memory-efficient than the existing alternatives and is the
+first multi-threaded genomic toolbox.
+
+\footnotetext{TIOBE}
 
 \section*{Library}
 
+\subsection*{Design goals}
+
+PyRanges is an implementation of the GenomicRanges datastructure for Python
+guided by three principles:
+
+\begin{itemize}
+  \item speed and memory-efficiency
+  \item ease of use
+  \item interoperability with the Python data science stack
+  \item effortless parallelism
+\end{itemize}
+
+
+\subsubsection*{Speed and memory-efficiency}
+
+PyRanges needs to be fast an memory-efficient so that it makes even very large
+genomic analyses feasible and that it can serve as building block for future
+genomics libraries in Python.
+
+\subsubsection*{Ease of use}
+
+* avoid creating many new classes and methods
+
+* use known Python syntax
+
+*
+
+\subsubsection*{Interoperability with the existing Python data science stack}
+
+Python has a large ecosystem of libraries for performing statistics, machine
+learning and visualization. All these are made for working on Numpy arrays (or
+their convenience wrappers Pandas Series/DataFrames) so by using these data
+types to represent data, we enable a large number of statistical methods to be
+used for analysing and manipulating PyRanges. Furthermore, this helps ease of
+use as known methods can be used to manipulate PyRanges instead of having to
+learn new syntax. Lastly, as Pandas is a continually developed library,
+improvements to the Pandas library in speed and memory will benefit PyRanges.
+
+\subsubsection*{Effortless parallelism}
+
+All methods on PyRanges should be able to run in parallel. As genomes are made
+up of collections of discrete data called chromosomes, and the operations for
+each chromosome is independent of that of the others, it is possible to run all
+operations in parallel. For this reason PyRanges should have a framework for
+running functions in parallel per chromosome, so that users and developers can
+write the code that should run in parallel per chromosome and have PyRanges
+apply it in parallel for them.
+
+\subsection*{Description}
+
 The main feature of the PyRanges library is the PyRanges datastructure, a
-2D-table where each row represents an interval, and each column describes part
-of the location of the interval (chromosome, start position, end position, and
-optionally, strand) or some aspect of its metadata (name, score, exon number or
-any arbitrary value desired by the user).
+2D-table where each row represents an interval, and the columns each describe
+part of the location (chromosome, start position, end position, and optionally,
+strand) or metadata (name, score, exon number or any arbitrary value desired by
+the user).
 
 PyRanges objects are instantiated by creating them from regular Python objects,
 Pandas Dataframes or reading common bioinformatics file formats such as bed, bam
@@ -196,8 +247,9 @@ Each binary operation supports the flags strandedness, which takes the values
 'same', 'opposite' or False/None. These run the analyses on the same strand,
 opposite strand or ignore strand information, respectively.
 
-For single-PyRanges methods, the flag strand exists, which is set to True or
-False, depending on whether you want to take strand information into account.
+For methods used on single PyRanges, the flag strand exists, which is used to
+indicate whether you want to run the operations per chromosome or per
+chromosome/strand pair.
 
 \begin{table}[!ht]
 \begin{adjustwidth}{-1.5in}{0in}
@@ -270,21 +322,25 @@ new RLEs. This enables nucleotide-level computations and comparisons of coverage
 or scores from pairs of interval collections, even though they cover genomes
 spanning billions of nucleotides.
 
-For convenience, a class called PyRles can contain a genome of run length
-encodings. In this way arithmetic operations can be performed per chromosome (or
-each chromosome/strand pair), by simply calling any arithmetic operation (e.g.
-+) on the two PyRles.
+The class PyRles allows one to conveniently compare collections of Rles
+representing genomes. Using these arithmetic operations can be performed per
+chromosome (or each chromosome/strand pair), by simply calling any arithmetic
+operation (e.g. +) on the two PyRles.
 
 \subsection*{Nested Containment List}
 
 PyRanges also provides a modified implementation of the Nested Containment List.
-This library is especially made for PyRanges, but written as its own library and
-made available to the general public. It has the neat property that it takes
-Numpy arrays and Pandas Series as input both when creating the NCLS and when
-executing queries. Numpy arrays and Pandas Series are both stored contiguously
-in memory with low-level datatypes, which means that both NCLS creation and
-overlap queries happen at the speed of highly optimized C, even though both
-operations are performed with one simple line of Python code.
+This library is especially made for PyRanges, but written to allow independent
+use and made available to the general public. It has the neat property that it
+takes Numpy arrays and Pandas Series as input both when creating the NCLS and
+when executing queries. Numpy arrays and Pandas Series are both stored
+contiguously in memory with low-level datatypes, which means that both NCLS
+creation and overlap queries happen at the speed of highly optimized C, even
+though each operation is performed with one single line of Python code.
+
+\section*{Example usage}
+
+blablabla
 
 \section*{Implementation}
 
@@ -305,8 +361,10 @@ that the table of genomic data does not need to be split or combined after
 distributing the data to different cores for parallel processing (this division
 is invisible to the end-user however).
 
+Each row unique integer index. These found with NCLS...
+
 Multithreading is achieved by using the Ray library to distribute jobs on
-different cores for asynchronous computation \cite{}.
+different cores for asynchronous computation \cite{}. How this is done...
 
 \subsection*{PyRles}
 
@@ -317,28 +375,33 @@ implemented as a simple Python class, where each RLE is stored in a dict.
 \subsection*{Nested Containment List}
 
 PyRanges uses the Nested Containment
-List\cite{doi:10.1093/bioinformatics/btl647} (NCLS) for operations involving
-nucleotide overlap. The NCLS is a tree-like structure for performing interval
-queries. It works by sorting an array of intervals into one main list and then
-(possibly) several sublists, where each list upholds the property that no
-interval in the list is purely contained in another. This allows for binary
-searches in each list, and it has the nice property that as the first
-overlapping interval is found, the rest can be retrieved by simple linear
-iteration.
+List\cite{doi:10.1093/bioinformatics/btl647} (NCLS) for overlap operations. The
+NCLS is a tree-like structure for performing interval queries. It works by
+sorting an array of intervals into one main list and then (possibly) several
+sublists, where each list upholds the property that no interval in the list is
+purely contained in another. This allows for binary searches in each list, and
+it has the nice property that as the first overlapping interval is found, the
+rest can be retrieved by simple linear iteration.
 
-The Nested Containment List used ..
+The NCLS used for PyRanges is a modified version of the nclist written for the
+now defunct PyGR library. The main changes are reducing the interval structure
+to only contain a start, end and ID (thereby reducing the memory use by 40
+percent), and implementing a 32 bit version, (thereby reducing the memory
+consumption by another 50 percent). Furthermore, the NCLS has been augmented
+with a collection of methods, which enables passing arrays of starts and ends to
+query the NCLS completely in C.
 
 \section*{Performance}
 
-The PyRanges library has been extensively tested for both speed and memory use.
-In the below tests, unsorted files generated by bedtools random for hg38 were
-used. Unsorted data do not affect the runtime or memory-usage of
+The PyRanges library has been extensively benchmarked for both speed and memory
+use. In the below tests, unsorted files generated by bedtools random for hg38
+were used. Unsorted data do not affect the runtime or memory-usage of
 PyRanges/GenomicRanges, but makes some PyBedTools-operations slower and more
 memory-consuming. But as sorting large amounts of data needs much time and
 memory, it is not likely that a benchmark that included sorting the data then
-running bedtools using less time and memory would lead to a more favorable
-benchmark. and then As PyBedTools operations always start with and and end with
-I/O, it is not possible to measure the speed of the operations themselves.
+running bedtools would lead to a more favorable benchmark. Note that as all
+PyBedTools operations start with and and end with I/O, it is not possible
+to measure the speed of the operations themselves.
 
 \subsection*{Speed}
 
@@ -372,9 +435,30 @@ polling the running process.
 % \label{fig2} % use \ref{fig1} to reference to this figure
 % \end{figure} % avoid blank space here
 
+\section*{Testing}
+
+PyRanges has an extensive suite of tests written using the testing library
+Hypothesis. This is a framework for genarating tests using the computer, so that
+a much more thorough exercising of the code is possible. This is done using a
+method called property based testing (PBT), which works by having the computer
+generate random tests data according to some specification and then ensuring the
+the output preserves some known invariant (e.g. that the square of an
+non-imaginary number is positive.)
+
+Two advantages of PBT is that an infinite number of tests can in principle be
+generated and that these will include test cases exercising hairy edge-case
+functionality which humans would likely not think of. The downside of PBT is
+that you usually cannot ensure that the function produces the correct result in
+each case, only that some invariant holds.
+
+But in our case, as there exist mature and proven libraries that do the same
+thing as our code (Bedtools for the PyRanges functionality and S4Vectors for the
+PyRles) we can use these as "oracles" and actually test that our functions
+produce the desired result.
+
 \section*{Discussion}
 
-\subsection*{Comparison with R GenomicRanges}
+\subsection*{PyRanges vs. R GenomicRanges}
 
 PyRanges is a reimplementation of R GenomicRanges for Python. In addition to the
 previously discussed speed and memory improvements, PyRanges is implemented with
@@ -382,7 +466,8 @@ a focus on user friendliness. This has resulted in a much simplified
 user-experience than R GenomicRanges, visible in the following ways:
 
 \begin{itemize}
-  \item subsetting PyRanges is much easier than subsetting GenomicRanges
+  \item It is easier to create a PyRanges (can read as dataframe and turn into GRange)
+  \item subsetting PyRanges takes much less code than subsetting GenomicRanges
   \item manipulating the data in PyRanges is much easier than in GenomicRanges
   \item the PyRanges API is much more streamlined
 \end{itemize}
@@ -396,6 +481,8 @@ improved/extended so are PyRanges.
 
 Do fewer R GenomicRanges operations retain metadata?
 
+Switching out multithreaded backend also easy.
+
 and seamless integration with the Python data
 science ecosystem
 
@@ -404,7 +491,7 @@ science ecosystem
 PyBedtools is a wrapper for using bedtools in Python. However, its dependence on
 bedtools limits it flexibility and speed in many ways.
 
-\subsubsection*{bedtools}
+\subsubsection*{PyRanges vs. bedtools}
 
 Some limitations that are inherent in bedtools that does not exist in PyRanges
 is that
@@ -414,53 +501,59 @@ is that
     for it to understand them
   \item data is streamed, not stored in memory
   \item some operations require pre-sorted data
+  \item not possible to subset the data
 \end{enumerate}
 
-An example of 1) leading to hard to understand and debug behavior in bedtools is
-that you cannot run stranded operations on files where strand is not the sixth
-column, since the bed-format definition says that strand is the sixth column.
-Instead bedtools runs the operation without taking strand into consideration,
-all the while not producing any warning or error-messages, so that the user ends
-up with the wrong result. In comparison, PyRanges can have arbitrarily many or
-few columns in any order, which means that it can operate on any tabular
+An example of rigid format requirements leading to hard to understand and debug
+behavior in bedtools is that you cannot run stranded operations on files where
+strand is not the sixth column, since the bed-format definition says that strand
+is the sixth column. Instead bedtools runs the operation without taking strand
+into consideration, without any warning or error-messages, silently producing
+the wrong result. In comparison, PyRanges can have arbitrarily many or few
+columns in any order, which means that it can operate on any tabular
 bioinformatics-file, as long as these contain one interval per row. This is a
 tremendous boon for bioinformatics where there is a profilation of new, ad-hoc
 or slightly modified file formats.
 
-2) can be a boon as the efficient fjoin-algorithm (O(n*k) speed/O(1) memory
-algorithm) can be used on the data to find overlaps. However, as this operation
-does not produce sorted output, it means that in a sequence of steps, each step
-in a pipeline needs to be followed by a sort operation for bedtools to retain
-its efficiency. While PyRanges also requires sorting for all its overlap-based
+Bedtools uses the efficient fjoin-algorithm (O(n*k) speed/O(1) memory algorithm)
+to find overlaps when the input-data is sorted. However, as this operation does
+not produce sorted output, it means that in a sequence of steps, each step in a
+pipeline needs to be followed by a sort operation for bedtools to retain its
+efficiency. While PyRanges also requires sorting for all its overlap-based
 operations, it already has the data in memory and only needs to sort the
 intervals in the \textit{queried} dataset. Furthermore, PyRanges only needs to
 sort the coordinates themselves (structs of three 32- or 64-bit integers -
-start, end and index), while in bedtools you need to sort the order of the
+start, end and index), while bedtools needs to sort the order of the
 entries in the bed/bam/vcf/GFF or GTF-files themselves, which is orders of
 magnitude more expensive.
 
-3) can lead to annoying behavior as an out of order entry might not be
-discovered until the end of a (possibly long-running) operation, but which would
-then make bedtools abort.
+Bedtools use of streaming can lead to annoying behavior as an out of order entry
+might not be discovered until the end of a (possibly long-running) operation,
+but which would then make bedtools abort.
 
-\subsubsection*{PyBedtools}
+\subsubsection*{PyRanges vs. PyBedtools}
 
-PyBedtools gives access to bedtools from the Python programming-environment.
-
-However, its reliance on bedtools severely limits the capabilities and speed of
-allowed operations.
-
-bedtools produces output entries in a stream as it discovers them. These can be
-operated on with PyBedtools in for-loops. However, as each entry is turned into
-a Python-object for manipulations and then passed back again to the
-output-stream, this is very slow. Compare this with PyRanges-operations which
-operate on contiguously arranged low-level datatypes at C-level speed.
-TODO: can one access custom fields?
+PyBedtools gives access to bedtools from the Python programming-environment. It
+does not really extend the capabilities of bedtools, but rather makes it more
+convenient to use by allowing the user to operate on streams of data using
+Python, instead of UNIX tools. As bedtools does not keep data in memory, one
+needs to operate on streams. Pybedtools allows this streaming by turning each
+entry into a Python-object for manipulations and then converting these back to a
+textual format for the output stream. This is very slow. Compare this with
+PyRanges which operates on contiguously arranged low-level datatypes at C-level
+speed.
+% TODO: can one access custom fields?
 
 A further limitation of this streaming approach is that none of Pythons vast
 number of high-performance scientific libraries can be used on the data, as
 these operate on contiguous arrays, not single entries of custom datatypes.
 
+\subsection*{PyRles vs. S4Vectors}
+
+
+\subsection*{NCLS vs. bisection}
+
+\section*{Conclusion}
 
 
 
