@@ -1,13 +1,11 @@
-import pandas as pd
+from helpers import read_file, init_ray; init_ray(snakemake.wildcards)
 from pyranges import PyRanges
 
 from time import time
 import datetime
 
-
-chip = pd.read_table(snakemake.input[0], sep="\t", usecols=[0, 1, 2, 5],
-                     header=None, names="Chromosome Start End Strand".split(),
-                     dtype={"Chromosome": "category", "Strand": "category"})
+f = snakemake.input[0]
+chip = read_file(f)
 
 start = time()
 granges = PyRanges(chip, copy_df=False)

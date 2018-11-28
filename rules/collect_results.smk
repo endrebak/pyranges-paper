@@ -1,8 +1,14 @@
 
+def get_files(w):
+    # print(category_dict)
+    # print("----")
+    # print(category_dict[w.category])
+    return category_dict[w.category]
+
 
 rule collect_times:
     input:
-        lambda w: category_dict[w.category]
+        get_files
     output:
         "{prefix}/benchmark/collected_timings_{category}.txt"
     run:
@@ -18,7 +24,7 @@ rule collect_times:
 
             timing = open(f).readlines()[0].strip()
 
-            if "pyranges_" in library or library == "pybedtools":
+            if library != "bioconductor":
                 minutes, seconds, fraction = timing.split(".")
                 minutes, seconds = int(minutes), int(seconds)
                 seconds += minutes * 60

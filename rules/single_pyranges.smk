@@ -1,48 +1,49 @@
 
 
-rule pyranges_bed_to_pyranges:
+
+rule pyranges_dataframe_to_pyranges:
     input:
-        "{prefix}/data/download/chip_{size}.bed.gz"
+        correct_file
     output:
-        "{prefix}/benchmark/bed_to_granges/pyranges_{num_cores}/{iteration}_{size}_time.txt"
+        "{prefix}/benchmark/dataframe_to_granges/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt"
     benchmark:
-        "{prefix}/benchmark/bed_to_granges/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/dataframe_to_granges/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
     script:
-        "../scripts/bed_to_GRanges.py"
+        "../scripts/dataframe_to_GRanges.py"
 
 
 
-rule bioconductor_bed_to_GRanges:
+rule bioconductor_dataframe_to_GRanges:
     input:
-        "{prefix}/data/download/chip_{size}.bed.gz"
+        correct_file
     output:
-        "{prefix}/benchmark/bed_to_granges/bioconductor/{iteration}_{size}_time.txt"
+        "{prefix}/benchmark/dataframe_to_granges/bioconductor/{filetype}/{iteration}_{size}_time.txt"
     benchmark:
-        "{prefix}/benchmark/bed_to_granges/bioconductor/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/dataframe_to_granges/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
     script:
-        "../scripts/bed_to_GRanges.R"
+        "../scripts/dataframe_to_GRanges.R"
 
 
 rule pybedtools_cluster:
     input:
-        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        correct_file
     output:
-        time = "{prefix}/benchmark/cluster/pybedtools/{iteration}_{size}_time.txt",
+        time = "{prefix}/benchmark/cluster/pybedtools/{filetype}/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/cluster/pybedtools/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/cluster/pybedtools/{filetype}/{iteration}_{size}_benchmark.txt"
     threads:
         4
     script:
-        "../scripts/cluster_pybedtools.py"
+        "../scripts/pybedtools_cluster.py"
 
 
 rule pyranges_cluster:
     input:
-        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        correct_file
     output:
-        time = "{prefix}/benchmark/cluster/pyranges_{num_cores}/{iteration}_{size}_time.txt",
+        time = "{prefix}/benchmark/cluster/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/cluster/pyranges_{num_cores}/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/cluster/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
     threads:
         4
     script:
@@ -51,10 +52,28 @@ rule pyranges_cluster:
 
 rule bioconductor_cluster:
     input:
-        chip = "{prefix}/data/download/chip_{size}.bed.gz",
+        correct_file
     output:
-        time = "{prefix}/benchmark/cluster/bioconductor/{iteration}_{size}_time.txt",
+        time = "{prefix}/benchmark/cluster/bioconductor/{filetype}/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/cluster/bioconductor/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/cluster/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
     script:
         "../scripts/cluster.R"
+
+
+rule pyranges_start_end_sort:
+    input:
+        correct_file
+    output:
+        time = "{prefix}/benchmark/sort/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
+    script:
+        "../scripts/sort.py"
+
+
+rule pybedtools_start_end_sort:
+    input:
+        correct_file
+    output:
+        time = "{prefix}/benchmark/sort/pybedtools/{filetype}/{iteration}_{size}_time.txt",
+    script:
+        "../scripts/pybedtools_sort.py"
