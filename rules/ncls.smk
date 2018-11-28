@@ -28,9 +28,9 @@ rule ncls_build:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        time = "{prefix}/benchmark/tree_build/ncls/{iteration}_{size}_time.txt",
+        time = "{prefix}/benchmark/tree_build/pyranges_1/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/tree_build/ncls/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/tree_build/pyranges_1/{iteration}_{size}_benchmark.txt"
     script:
         "../scripts/ncls_build.py"
 
@@ -40,8 +40,8 @@ rule ncls_overlap:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        time = "{prefix}/benchmark/tree_overlap/ncls/{iteration}_{size}_time.txt",
+        time = "{prefix}/benchmark/tree_overlap/pyranges_1/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/tree_overlap/ncls/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/tree_overlap/pyranges_1/{iteration}_{size}_benchmark.txt"
     script:
         "../scripts/ncls_overlap.py"

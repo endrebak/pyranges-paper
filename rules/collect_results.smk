@@ -1,8 +1,5 @@
 
 def get_files(w):
-    # print(category_dict)
-    # print("----")
-    # print(category_dict[w.category])
     return category_dict[w.category]
 
 
@@ -10,7 +7,7 @@ rule collect_times:
     input:
         get_files
     output:
-        "{prefix}/benchmark/collected_timings_{category}.txt"
+        "{prefix}/benchmark/collected_timings_{filetype}_{category}.txt"
     run:
         rowdicts = []
         for f in input:
@@ -60,9 +57,9 @@ rule collect_times:
 
 rule find_mean_times:
     input:
-        "{prefix}/benchmark/collected_timings_{category}.txt"
+        "{prefix}/benchmark/collected_timings_{filetype}_{category}.txt"
     output:
-        "{prefix}/benchmark/collected_timings_mean_{category}.txt"
+        "{prefix}/benchmark/collected_timings_mean_{filetype}_{category}.txt"
     run:
         df = pd.read_table(input[0], sep="\t", header=0)
 
