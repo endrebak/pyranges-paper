@@ -28,5 +28,6 @@ get_df <- function (f){
 }
 
 file_to_grange <- function(f){
+  df <- get_df(f)
   return(GRanges(seqnames = df$Chromosome, ranges = IRanges(start = df$Start, end = df$End), strand = df$Strand))
 }

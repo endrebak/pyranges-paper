@@ -77,3 +77,31 @@ rule pybedtools_start_end_sort:
         time = "{prefix}/benchmark/sort/pybedtools/{filetype}/{iteration}_{size}_time.txt",
     script:
         "../scripts/pybedtools_sort.py"
+
+
+
+rule pyranges_dataframe_to_coverage:
+    "How long it takes to turn a dataframe-file into a PyRles-object."
+    input:
+        correct_file
+    output:
+        timing = "{prefix}/benchmark/dataframe_to_coverage/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
+    benchmark:
+        "{prefix}/benchmark/dataframe_to_coverage/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
+    threads:
+        4
+    script:
+        "../scripts/dataframe_to_coverage.py"
+
+
+rule bioconductor_dataframe_to_coverage:
+    "How long it takes to turn a dataframe-file into an RleList."
+    input:
+        correct_file
+    output:
+        timing = "{prefix}/benchmark/dataframe_to_coverage/bioconductor/{filetype}/{iteration}_{size}_time.txt",
+        preview = "{prefix}/benchmark/dataframe_to_coverage/bioconductor/{filetype}/{iteration}_{size}_preview.txt"
+    benchmark:
+        "{prefix}/benchmark/dataframe_to_coverage/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
+    script:
+        "../scripts/dataframe_to_coverage.R"

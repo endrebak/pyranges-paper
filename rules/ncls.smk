@@ -1,5 +1,3 @@
-
-
 rule quicksect_build:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
