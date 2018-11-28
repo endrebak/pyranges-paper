@@ -29,12 +29,10 @@ def regex(lst):
 
     return "({})".format("|".join([str(e) for e in lst]))
 
-# sort = "sorted unsorted".split()
 sort = ["sorted"]
 num_cores = [1, 2, 4, 8, 24, 48]
 
 wildcard_constraints:
-    # chip = "(chip|input)", # regex(test_files.keys()),
     filetype = regex("reads annotation".split()),
     # size = regex(sizes),
     # iteration = regex(iterations),
@@ -114,5 +112,5 @@ def correct_file(w):
 
 
 for rule in glob.glob("rules/*.smk"):
-    print("including: " + rule)
+    print("including: " + rule, file=sys.stderr)
     include: rule

@@ -4,7 +4,7 @@ titles = {"tree": "bx-python vs. PyRanges NCLS",
           "single": "BioConductor GenomicRanges vs. pybedtools vs. PyRanges",
           "binary": "BioConductor GenomicRanges vs. pybedtools vs. PyRanges"}
 
-method_names = {"tree": ", Tree Metho: ",
+method_names = {"tree": ", Tree Methods: ",
                 "rle": ", RLE Methods: ",
                 "I/O": ", IO Methods: ",
                 "single": ", Unary Methods: ",
