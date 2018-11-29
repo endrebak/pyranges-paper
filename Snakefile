@@ -13,9 +13,9 @@ from pyrle import PyRles
 from os import environ
 
 ss = pd.read_table("sample_sheet.txt", sep=" ", header=0)
-print(ss)
 
 binary_map = yaml.load(open("supplementaries/binary.yaml"))
+unary_map = yaml.load(open("supplementaries/unary.yaml"))
 
 if not environ.get("TMUX"):
     raise Exception("Not using TMUX!")
@@ -23,7 +23,7 @@ if not environ.get("TMUX"):
 import platform
 
 prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
-iterations = range(3)
+iterations = [0] # range(3)
 libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48 bx-python".split()
 sizes = [int(f) for f in [1e6, 1e7, 1e8]] #, 1e9, 1e10]]
 pybedtool_sizes = [int(f) for f in [1e6, 1e7]] #, 1e9, 1e10]]
@@ -38,8 +38,13 @@ num_cores = [1]
 
 sizes = [int(f) for f in [1e6]] #, 1e9, 1e10]]
 
+# print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
+# raise
+
 wildcard_constraints:
     filetype = regex("reads annotation".split()),
+    unary_operation = regex(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"])),
+    operation = regex(list(binary_map["pybedtools"]) + list(binary_map["bioconductor"]))
     # size = regex(sizes),
     # iteration = regex(iterations),
     # libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
@@ -59,7 +64,6 @@ def _expand(functions):
         libraries = list(ss[ss["Function"] == function].Library)
 
         multicore = ss[(ss.Function == function) & (ss.Library == "pyranges")].Multicore
-        print(multicore)
         assert len(multicore) < 2
         if len(multicore) == 1:
             multicore = multicore.iloc[0]

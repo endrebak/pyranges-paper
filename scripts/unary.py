@@ -1,16 +1,17 @@
-
-
 from helpers import read_file, file_to_grange, init_ray; init_ray(snakemake.wildcards)
 
 from time import time
 import datetime
 
+operation = snakemake.wildcards.unary_operation
 
 f = snakemake.input[0]
 gr = file_to_grange(f)
 
+m = getattr(gr, operation)
+
 start = time()
-result = gr.cluster(strand=True)
+result = m(strandedness="same")
 end = time()
 total = end - start
 

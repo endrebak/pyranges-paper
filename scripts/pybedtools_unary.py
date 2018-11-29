@@ -1,19 +1,23 @@
-from helpers import read_file, file_to_grange, init_ray; init_ray(snakemake.wildcards)
+
+from pybedtools import BedTool
 
 from time import time
 import datetime
 
+c = snakemake.input[0]
 
-f = snakemake.input[0]
-gr = file_to_grange(f)
+pb1 = BedTool(c)
 
-print(gr)
+op = snakemake.params.operation
+print(op)
+
 start = time()
-result = gr.sort()
-end = time()
-total = end - start
 
-print(result)
+exec(op)
+
+end = time()
+
+total = end - start
 
 total_dt = datetime.datetime.fromtimestamp(total)
 

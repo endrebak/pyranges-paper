@@ -1,0 +1,16 @@
+bioconductor:
+  cluster: |
+    result = reduce(gr)
+  sort: |
+    result = sortSeqlevels(gr)
+    result = sort(result)
+  coverage: |
+    result = coverage(gr)
+
+
+
+pybedtools:
+  cluster:
+    result = pb1.cluster(pb2, s=True)
+  sort:
+    result = pb1.sort()

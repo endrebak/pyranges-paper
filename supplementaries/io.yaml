@@ -1,0 +1,8 @@
+bioconductor:
+  read_bed: |
+    result = reduce(gr)
+  read_bam: |
+    result = sortSeqlevels(gr)
+    result = sort(result)
+  read_gff: |
+    result = coverage(gr)

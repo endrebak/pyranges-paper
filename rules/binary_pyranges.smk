@@ -5,11 +5,11 @@ rule pybedtools_overlap:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        time = "{prefix}/benchmark/overlap/pybedtools/{filetype}/{iteration}_{size}_time.txt",
+        time = "{prefix}/benchmark/{operation}/pybedtools/{filetype}/{iteration}_{size}_time.txt",
     benchmark:
-        "{prefix}/benchmark/overlap/pybedtools/{filetype}/{iteration}_{size}_benchmark.txt"
-    threads:
-        4
+        "{prefix}/benchmark/{operation}/pybedtools/{filetype}/{iteration}_{size}_benchmark.txt"
+    params:
+        operation = lambda w: binary_map["pybedtools"][w.operation]
     script:
         "../scripts/pybedtools_binary.py"
 

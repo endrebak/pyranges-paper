@@ -1,22 +1,22 @@
-
 from pybedtools import BedTool
 
 from time import time
 import datetime
 
-c = snakemake.input[0]
-# b = snakemake.input.background
+c = snakemake.input.chip
+b = snakemake.input.background
 
-chip = BedTool(c)
-# bg = BedTool(b)
+pb1 = BedTool(c)
+pb2 = BedTool(b)
+
+op = snakemake.params.operation
+print(op)
 
 start = time()
 
-result = chip.sort().merge(s=True)
+exec(op)
 
 end = time()
-
-# print(result)
 
 total = end - start
 
@@ -25,5 +25,3 @@ total_dt = datetime.datetime.fromtimestamp(total)
 minutes_seconds = total_dt.strftime('%-M.%-S.%f')
 
 open(snakemake.output[0], "w+").write(minutes_seconds)
-
-# result.df.to_csv(snakemake.output.result, sep=" ", index=False)

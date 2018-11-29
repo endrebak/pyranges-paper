@@ -1,4 +1,5 @@
 library(data.table)
+library(GenomicRanges)
 
 getExtension <- function(file){
   ex <- strsplit(basename(file), split="\\.")[[1]]
