@@ -13,11 +13,12 @@ rule collect_times:
         for f in input:
             # print(f)
             bmark_f = f.replace("time.txt", "benchmark.txt")
-            function, library, timingfile = f.split("/")[-3:]
+
+            function, library, filetype, timingfile = f.split("/")[-4:]
             iteration, size = timingfile.split("_")[:2]
             size = int(size)
-            print(function, library, timingfile )
-            print(iteration, size)
+            # print(function, library, timingfile )
+            # print(iteration, size)
 
             timing = open(f).readlines()[0].strip()
 

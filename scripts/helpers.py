@@ -19,7 +19,7 @@ def read_file(f, dtype=np.int32):
 
     cols = d[ext]
 
-    print("using dtype: ", dtype)
+    # print("using dtype: ", dtype)
     df = pd.read_table(f, sep="\t", usecols=cols,
                          header=None, names="Chromosome Start End Strand".split(),
                          dtype={"Chromosome": "category", "Strand": "category", "Start": dtype, "End": dtype})
@@ -38,3 +38,10 @@ def file_to_grange(f, dtype=np.int32):
         extended = False
 
     return PyRanges(df, extended=extended)
+
+
+def file_to_coverage(f, dtype=np.int64):
+
+    from pyranges import PyRles
+    gr = file_to_grange(f, dtype)
+    return PyRles(gr, stranded=True)
