@@ -33,8 +33,9 @@ file_to_grange <- function(f){
   return(GRanges(seqnames = df$Chromosome, ranges = IRanges(start = df$Start, end = df$End), strand = df$Strand))
 }
 
-file_to_coverage <- function(f){
-  df <- get_df(f)
-  gr <- file_to_grange(df)
-  return(gr)
+file_to_coverage <- function(f, strand){
+  gr <- file_to_grange(f)
+
+  return(coverage(gr[gr@strand == strand]))
+
 }

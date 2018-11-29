@@ -1,13 +1,15 @@
 bioconductor:
   intersect: |
     pairs = findOverlapPairs(gr1, gr2, ignore.strand = FALSE)
-    result = pintersect(pairs)
+    result = pintersect(pairs, ignore.strand = FALSE)
   overlap: |
-    result = findOverlaps(gr2, gr1, ignore.strand = FALSE, select="first")
-    result = chip[!is.na(result)]
+    result = findOverlapPairs(gr2, gr1, ignore.strand = FALSE)
+    result = first(result)
+    result = gr2[!is.na(result)]
   nearest: |
     result = distanceToNearest(gr1, gr2, ignore.strand = FALSE, select="arbitrary")
-    result = chip[!is.na(result)]
+    print(result)
+    result = gr1[!is.na(result)]
   nearest_nonoverlapping: |
     fun <- function(x) {min(x) == x & !duplicated(x)}
     hits <- union(
@@ -28,7 +30,8 @@ bioconductor:
   set_union: |
     result = union(gr1, gr2)
   join: |
-    ""
+    result <- findOverlapPairs(gr1, gr2, ignore.strand = TRUE)
+    # result <- first(pairs)
   subtract: |
     result = psetdiff(gr1, gr2, ignore.strand=FALSE)
 

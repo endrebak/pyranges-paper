@@ -10,7 +10,7 @@ import numpy as np
 chip = file_to_coverage(snakemake.input.chip)
 background = file_to_coverage(snakemake.input.background)
 
-operation = snakemake.wildcards.operation
+operation = snakemake.wildcards.rle_operation
 
 pyop = {"add": "__add__", "subtract": "__sub__", "multiply": "__mul__", "divide": "__truediv__"}[operation]
 

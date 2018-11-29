@@ -5,11 +5,14 @@ f = match.fun(snakemake@params[[1]])
 fc = snakemake@input[["chip"]]
 fb = snakemake@input[["background"]]
 
-chip = file_to_coverage(fc)
-background = file_to_coverage(fb)
+c1p = file_to_coverage(fc, "+")
+c1m = file_to_coverage(fc, "-")
+c2p = file_to_coverage(fb, "+")
+c2m = file_to_coverage(fb, "-")
 
 start.time <- Sys.time()
-res = f(chip, background)
+resp = f(c1p, c2p)
+resm = f(c1m, c2m)
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time
