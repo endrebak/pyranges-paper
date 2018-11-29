@@ -16,10 +16,9 @@ pyop = {"add": "__add__", "subtract": "__sub__", "multiply": "__mul__", "divide"
 
 m = getattr(chip, pyop)
 
-
 start = time()
 
-result_pyranges = m(background)
+result = m(background)
 
 end = time()
 total = end - start

@@ -1,0 +1,52 @@
+bioconductor:
+    intersect: |
+      pairs = findOverlapPairs(gr1, gr2, ignore.strand = FALSE)
+      result = pintersect(pairs)
+    overlap: |
+      result = findOverlaps(gr2, gr1, ignore.strand = FALSE, select="first")
+      result = chip[!is.na(result)]
+    nearest: |
+      result = distanceToNearest(gr1, gr2, ignore.strand = FALSE, select="arbitrary")
+      result = chip[!is.na(result)]
+    nearest_nonoverlapping: |
+      fun <- function(x) {min(x) == x & !duplicated(x)}
+      hits <- union(
+      # there is a bug in this method (suggested by the developers), so does not work with returning only single query
+      # must use all. see https://support.bioconductor.org/p/110506/
+      precede(gr1, gr2, select="all"),
+      follow(gr1, gr2, select="all")
+      )
+      ## minimum distance by query
+      distance <- distance(gr1[queryHits(hits)], gr2[subjectHits(hits)])
+      lst <- splitAsList(distance, queryHits(hits))
+      keep <- unsplit(fun(lst), queryHits(hits))
+      ## clean-up
+      mcols(hits)$distance <- distance
+      result = hits[keep]
+    set_intersect: |
+      result = intersect(gr1, gr2)
+    set_union: |
+      result = union(gr1, gr2)
+    join: |
+
+pybedtools:
+  intersect:
+    pb1.intersect(pb2, s=True)
+  overlap:
+    pb1.intersect(pb2, s=True, wa=True)
+  nearest:
+    pb1.sort().closest(pb2.sort(), s=True)
+  nearest_nonoverlapping:
+    pb1.sort().closest(pb2.sort(), s=True, io=True)
+  set_intersect: |
+    # the first flag is needed to keep the sixth columns
+    sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
+    sb = pb2.sort().merge(s=True, c=[4, 5, 6], o="first")
+    sc.intersect(sb, s=True)
+  set_union:
+    # the first flag is needed to keep the sixth columns
+    sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
+    sb = pb2.sort().merge(s=True, c=[4, 5, 6], o="first")
+    sc.merge(sb, s=True)
+  join:
+    pb1.intersect(pb2, s=True, wao=True)

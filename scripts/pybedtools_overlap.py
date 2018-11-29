@@ -6,17 +6,12 @@ import datetime
 c = snakemake.input.chip
 b = snakemake.input.background
 
-chip = BedTool(c)
-bg = BedTool(b)
+pb1 = BedTool(c)
+pb2 = BedTool(b)
 
 start = time()
 
-# is_sorted = True if snakemake.wildcards.sorted == "sorted" else False
-
-# if is_sorted:
-#     result = chip.intersect(bg, s=True, sorted=is_sorted, wa=True)
-# else:
-result = chip.intersect(bg, s=True, wa=True)
+result = eval(snakemake.params.operation)
 
 end = time()
 

@@ -4,6 +4,7 @@ from time import time
 import datetime
 import glob
 
+import yaml
 import numpy as np
 import pandas as pd
 from pyranges import PyRanges
@@ -13,6 +14,8 @@ from os import environ
 
 ss = pd.read_table("sample_sheet.txt", sep=" ", header=0)
 print(ss)
+
+binary_map = yaml.load(open("supplementaries/binary.yaml"))
 
 if not environ.get("TMUX"):
     raise Exception("Not using TMUX!")
@@ -30,7 +33,10 @@ def regex(lst):
     return "({})".format("|".join([str(e) for e in lst]))
 
 sort = ["sorted"]
-num_cores = [1, 2, 4, 8, 24, 48]
+# num_cores = [1, 2, 4, 8, 24, 48]
+num_cores = [1]
+
+sizes = [int(f) for f in [1e6]] #, 1e9, 1e10]]
 
 wildcard_constraints:
     filetype = regex("reads annotation".split()),
