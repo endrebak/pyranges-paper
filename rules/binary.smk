@@ -20,8 +20,11 @@ rule pyranges_binary:
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         time = "{prefix}/benchmark/{operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}.result",
     benchmark:
         "{prefix}/benchmark/{operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
+    params:
+        code = lambda w: binary_map["pyranges"][w.operation]
     script:
         "../scripts/binary.py"
 
@@ -32,10 +35,11 @@ rule bioconductor_binary:
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         time = "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}.result",
     benchmark:
-        "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
+        "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt",
     params:
-        operation = lambda w: binary_map["bioconductor"][w.operation]
+        code = lambda w: binary_map["bioconductor"][w.operation]
     script:
         "../scripts/binary.R"
 

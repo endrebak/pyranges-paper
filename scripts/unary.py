@@ -6,12 +6,16 @@ import datetime
 operation = snakemake.wildcards.unary_operation
 
 f = snakemake.input[0]
-gr = file_to_grange(f)
 
-m = getattr(gr, operation)
+if operation != "dataframe_to_genomicrange":
+    gr = file_to_grange(f)
+else:
+    from pyranges import PyRanges
+    df = read_file(f)
 
+print(snakemake.params.code)
 start = time()
-result = m(strandedness="same")
+exec(snakemake.params.code)
 end = time()
 total = end - start
 
@@ -21,4 +25,8 @@ total_dt = datetime.datetime.fromtimestamp(total)
 
 minutes_seconds = total_dt.strftime('%-M.%-S.%f')
 
-open(snakemake.output[0], "w+").write(minutes_seconds)
+open(snakemake.output.time, "w+").write(minutes_seconds)
+
+result_string = str(result)
+
+open(snakemake.output.result, "w+").write(result_string)

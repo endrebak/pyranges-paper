@@ -16,6 +16,7 @@ ss = pd.read_table("sample_sheet.txt", sep=" ", header=0)
 
 binary_map = yaml.load(open("supplementaries/binary.yaml"))
 unary_map = yaml.load(open("supplementaries/unary.yaml"))
+tree_map = yaml.load(open("supplementaries/tree.yaml"))
 
 if not environ.get("TMUX"):
     raise Exception("Not using TMUX!")
@@ -36,15 +37,18 @@ sort = ["sorted"]
 # num_cores = [1, 2, 4, 8, 24, 48]
 num_cores = [1]
 
-sizes = [int(f) for f in [1e6]] #, 1e9, 1e10]]
+sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
+pybedtool_sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
 
 # print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
 # raise
 
+# print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
 wildcard_constraints:
     filetype = regex("reads annotation".split()),
     unary_operation = regex(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"])),
-    operation = regex(list(binary_map["pybedtools"]) + list(binary_map["bioconductor"]))
+    operation = regex(list(binary_map["pybedtools"]) + list(binary_map["bioconductor"])),
+    tree_operation = regex(list(tree_map["pyranges"]) + list(tree_map["bx-python"]))
     # size = regex(sizes),
     # iteration = regex(iterations),
     # libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
@@ -61,6 +65,8 @@ def _expand(functions):
 
     outfiles = []
     for function in functions:
+        # print("----" * 5)
+        # print("function", function)
         libraries = list(ss[ss["Function"] == function].Library)
 
         multicore = ss[(ss.Function == function) & (ss.Library == "pyranges")].Multicore
@@ -77,7 +83,6 @@ def _expand(functions):
         else:
             libraries += ["pyranges_1"]
 
-
         smaller_libs = set("bx-python ncls pybedtools".split())
         larger_libs = set(libraries) - smaller_libs
         smaller_libs = set(libraries) & smaller_libs
@@ -87,22 +92,35 @@ def _expand(functions):
         else:
             _sizes = sizes
 
-        outfiles = expand(path, function=functions, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype=filetypes) + \
-            expand(path, function=functions, prefix=prefix, iteration=iterations, size=pybedtool_sizes, library=smaller_libs, filetype=filetypes)
+        # if "dataframe" in function:
+        #     print(function)
+        #     print("larger_libs", larger_libs)
+        #     print("smaller_libs", smaller_libs)
 
-        return outfiles
+        _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype=filetypes) + \
+            expand(path, function=function, prefix=prefix, iteration=iterations, size=pybedtool_sizes, library=smaller_libs, filetype=filetypes)
+        # for f in _outfiles:
+        #     if "dataframe" in f and "pybedtools" in f:
+        #         print(f)
+        outfiles.extend(_outfiles)
+
+    return outfiles
 
 
-single_pyranges_functions = ss[ss.Category == "single"].Function
+single_pyranges_functions = ss[ss.Category == "single"].Function.drop_duplicates()
 single_pyranges_files = _expand(single_pyranges_functions)
 
-binary_pyranges_functions = ss[ss.Category == "binary"].Function
+# for f in single_pyranges_files:
+#     if "dataframe" in f and "pybedtools" in f:
+#         print(f)
+
+binary_pyranges_functions = ss[ss.Category == "binary"].Function.drop_duplicates()
 binary_pyranges_files = _expand(binary_pyranges_functions)
 
-rle_functions = ss[ss.Category == "rle"].Function
+rle_functions = ss[ss.Category == "rle"].Function.drop_duplicates()
 rle_files = _expand(rle_functions)
 
-tree_functions = ss[ss.Category == "tree"].Function
+tree_functions = ss[ss.Category == "tree"].Function.drop_duplicates()
 tree_files = _expand(tree_functions)
 
 category_dict = {"single": single_pyranges_files,
@@ -122,5 +140,24 @@ def correct_file(w):
 
 
 for rule in glob.glob("rules/*.smk"):
-    print("including: " + rule, file=sys.stderr)
+    # print("including: " + rule, file=sys.stderr)
+
+    # line to comment in if you want to rerun analyses with -F without regenerating the data
+    if "generate_data" in rule: continue
+
+    # never want to redownload data
+    if "download" in rule: continue
+
     include: rule
+
+
+rule all:
+    input:
+        expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict)
+
+
+rule generate:
+    input:
+        expand("{prefix}/data/download/annotation_{size}.gtf.gz", prefix=prefix, size=sizes),
+        expand("{prefix}/data/download/chip_{size}.bed.gz", prefix=prefix, size=sizes),
+        expand("{prefix}/data/download/background_{size}.bed.gz", prefix=prefix, size=sizes),

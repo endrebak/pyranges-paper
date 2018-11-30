@@ -61,3 +61,24 @@ pybedtools:
     result = pb1.subtract(pb2)
   jaccard:
     result = pb1.sort().jaccard(pb2.sort())
+
+
+pyranges:
+  intersect:
+    result = gr.intersect(gr2, strandedness="same")
+  overlap:
+    result = gr.overlap(gr2, strandedness="same")
+  nearest:
+    result = gr.nearest(gr2, strandedness="same")
+  nearest_nonoverlapping:
+    result = gr.nearest_nonoverlapping(gr2, strandedness="same")
+  set_intersect: |
+    result = gr.set_intersect(gr2, strandedness="same")
+  set_union: |
+    result = gr.set_union(gr2, strandedness="same")
+  join: |
+    result = gr.join(gr2, strandedness="same")
+  subtract: |
+    result = gr.subtract(gr2, strandedness="same")
+  jaccard: |
+    result = gr.jaccard(gr2)

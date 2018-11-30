@@ -1,16 +1,28 @@
 bioconductor:
+  dataframe_to_genomicrange:
+    result = GRanges(seqnames = df$Chromosome, ranges = IRanges(start = df$Start, end = df$End), strand = df$Strand)
   cluster: |
     result = reduce(gr)
   sort: |
     result = sortSeqlevels(gr)
     result = sort(result)
-  coverage: |
-    result = coverage(gr)
-
-
+  genomicrange_to_coverage: |
+    plus = coverage(gr[gr@strand == "+"])
+    minus = coverage(gr[gr@strand == "-"])
 
 pybedtools:
   cluster:
-    result = pb1.cluster(pb2, s=True)
+    result = pb1.sort().cluster()
   sort:
     result = pb1.sort()
+
+
+pyranges:
+  dataframe_to_genomicrange:
+    result = PyRanges(df)
+  genomicrange_to_coverage:
+    result = gr.coverage(strand="same")
+  sort:
+    result = gr.sort()
+  cluster:
+    result = gr.cluster(strand="same")

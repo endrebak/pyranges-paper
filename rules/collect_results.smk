@@ -1,5 +1,6 @@
 
 def get_files(w):
+    print("category", w.category)
     return category_dict[w.category]
 
 

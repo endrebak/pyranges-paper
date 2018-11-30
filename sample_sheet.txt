@@ -5,8 +5,8 @@ single sort pybedtools 0
 single cluster pyranges 1
 single cluster bioconductor 0
 single cluster pybedtools 0
-single dataframe_to_coverage pyranges 1
-single dataframe_to_coverage bioconductor 0
+single genomicrange_to_coverage pyranges 1
+single genomicrange_to_coverage bioconductor 0
 binary overlap pyranges 1
 binary overlap bioconductor 0
 binary overlap pybedtools 0
@@ -34,7 +34,7 @@ binary join pyranges 1
 binary join pybedtools 0
 tree tree_build pyranges 0
 tree tree_build bx-python 0
-tree tree_overlap ncls 0
+tree tree_overlap pyranges 0
 tree tree_overlap bx-python 0
 rle rle_divide bioconductor 0
 rle rle_divide pyranges 1

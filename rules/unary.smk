@@ -1,35 +1,38 @@
 
 
 
-rule pyranges_dataframe_to_pyranges:
-    input:
-        correct_file
-    output:
-        "{prefix}/benchmark/dataframe_to_granges/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt"
-    benchmark:
-        "{prefix}/benchmark/dataframe_to_granges/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
-    script:
-        "../scripts/dataframe_to_GRanges.py"
+# rule pyranges_dataframe_to_pyranges:
+#     input:
+#         correct_file
+#     output:
+#         "{prefix}/benchmark/dataframe_to_granges/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt"
+#     benchmark:
+#         "{prefix}/benchmark/dataframe_to_granges/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
+#     script:
+#         "../scripts/dataframe_to_GRanges.py"
 
 
 
-rule bioconductor_dataframe_to_GRanges:
-    input:
-        correct_file
-    output:
-        "{prefix}/benchmark/dataframe_to_granges/bioconductor/{filetype}/{iteration}_{size}_time.txt"
-    benchmark:
-        "{prefix}/benchmark/dataframe_to_granges/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
-    script:
-        "../scripts/dataframe_to_GRanges.R"
+# rule bioconductor_dataframe_to_GRanges:
+#     input:
+#         correct_file
+#     output:
+#         "{prefix}/benchmark/dataframe_to_granges/bioconductor/{filetype}/{iteration}_{size}_time.txt"
+#     benchmark:
+#         "{prefix}/benchmark/dataframe_to_granges/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
+#     script:
+#         "../scripts/dataframe_to_GRanges.R"
 
 rule pyranges_unary:
     input:
         correct_file
     output:
         time = "{prefix}/benchmark/{unary_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{unary_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}.result",
     benchmark:
         "{prefix}/benchmark/{unary_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
+    params:
+        code = lambda w: unary_map["pyranges"][w.unary_operation]
     script:
         "../scripts/unary.py"
 
@@ -39,6 +42,7 @@ rule bioconductor_unary:
         correct_file
     output:
         time = "{prefix}/benchmark/{unary_operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{unary_operation}/bioconductor/{filetype}/{iteration}_{size}.result",
     benchmark:
         "{prefix}/benchmark/{unary_operation}/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
     params:
