@@ -1,7 +1,9 @@
 
 def get_files(w):
-    print("category", w.category)
-    return category_dict[w.category]
+    # print("category", w.category)
+
+
+    return [f for f in category_dict[w.category]]
 
 
 rule collect_times:
@@ -71,7 +73,12 @@ rule find_mean_times:
             seconds = gdf.Seconds.mean()
             seconds_sd = gdf.Seconds.std()
             memory = gdf.MaxRSSGB.mean()
+            print(g)
+            print(gdf)
+            print(gdf.MaxRSSGB)
             memory_sd = gdf.MaxRSSGB.std()
+            print(memory_sd)
+            print("-------")
 
             head = gdf.head(1)
             rowdict = {}
@@ -83,4 +90,5 @@ rule find_mean_times:
             rowdicts.append(rowdict)
 
         df = pd.DataFrame.from_dict(rowdicts)["Function Library Log10NBIntervals MaxRSSGB Seconds SecondsSD MemorySD".split()]
+        print(df.head())
         df.to_csv(output[0], sep="\t", index=False)

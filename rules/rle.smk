@@ -6,11 +6,12 @@ rule pyranges_rle_arithmetic:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        "{prefix}/benchmark/rle_{rle_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt"
+        time = "{prefix}/benchmark/rle_{rle_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/rle_{rle_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}.result",
     benchmark:
         "{prefix}/benchmark/rle_{rle_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
-    threads:
-        4
+    params:
+        code = lambda w: rle_map["pyranges"][w.rle_operation]
     script:
         "../scripts/rle_arithmetic.py"
 
@@ -20,10 +21,11 @@ rule bioconductor_rle_arithmetic:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
-        "{prefix}/benchmark/rle_{rle_operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt"
+        time = "{prefix}/benchmark/rle_{rle_operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/rle_{rle_operation}/bioconductor/{filetype}/{iteration}_{size}.result"
     benchmark:
         "{prefix}/benchmark/rle_{rle_operation}/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
     params:
-        lambda w: {"add": "+", "subtract": "-", "divide": "/", "multiply": "*"}[w.rle_operation]
+        code = lambda w: rle_map["bioconductor"][w.rle_operation]
     script:
         "../scripts/rle_arithmetic.R"

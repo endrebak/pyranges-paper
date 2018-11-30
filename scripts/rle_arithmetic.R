@@ -1,6 +1,11 @@
 source("scripts/helpers.R")
 
-f = match.fun(snakemake@params[[1]])
+operation = snakemake@params[["code"]]
+operation = paste0("f <- function(c1p, c2p, c1m, c2m){\n", operation, "\nreturn(result)}")
+
+eval(parse(text=operation))
+print(operation)
+
 
 fc = snakemake@input[["chip"]]
 fb = snakemake@input[["background"]]
@@ -11,12 +16,14 @@ c2p = file_to_coverage(fb, "+")
 c2m = file_to_coverage(fb, "-")
 
 start.time <- Sys.time()
-resp = f(c1p, c2p)
-resm = f(c1m, c2m)
+result = f(c1p, c2p, c1m, c2m)
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time
 
 time.taken <- as.numeric(time.taken, units="secs")
 
-write(time.taken, file=snakemake@output[[1]])
+write(time.taken, file=snakemake@output[["time"]])
+
+result_string = capture.output(print(result))
+write(result_string, snakemake@output[["result"]])

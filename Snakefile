@@ -15,6 +15,7 @@ from os import environ
 ss = pd.read_table("sample_sheet.txt", sep=" ", header=0)
 
 binary_map = yaml.load(open("supplementaries/binary.yaml"))
+rle_map = yaml.load(open("supplementaries/rle.yaml"))
 unary_map = yaml.load(open("supplementaries/unary.yaml"))
 tree_map = yaml.load(open("supplementaries/tree.yaml"))
 
@@ -24,21 +25,24 @@ if not environ.get("TMUX"):
 import platform
 
 prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
-iterations = [0] # range(3)
+iterations = [0, 1] # range(3)
 libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48 bx-python".split()
 sizes = [int(f) for f in [1e6, 1e7, 1e8]] #, 1e9, 1e10]]
 pybedtool_sizes = [int(f) for f in [1e6, 1e7]] #, 1e9, 1e10]]
+
+# print(binary_map["pybedtools"])
 
 def regex(lst):
 
     return "({})".format("|".join([str(e) for e in lst]))
 
 sort = ["sorted"]
-# num_cores = [1, 2, 4, 8, 24, 48]
-num_cores = [1]
+num_cores = [1, 2, 4, 8, 24, 48]
 
-sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
-pybedtool_sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
+# num_cores = [1]
+
+# sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
+# pybedtool_sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
 
 # print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
 # raise
@@ -48,7 +52,8 @@ wildcard_constraints:
     filetype = regex("reads annotation".split()),
     unary_operation = regex(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"])),
     operation = regex(list(binary_map["pybedtools"]) + list(binary_map["bioconductor"])),
-    tree_operation = regex(list(tree_map["pyranges"]) + list(tree_map["bx-python"]))
+    tree_operation = regex(list(tree_map["pyranges"]) + list(tree_map["bx-python"])),
+    rle_operation = regex(rle_map["pyranges"])
     # size = regex(sizes),
     # iteration = regex(iterations),
     # libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
@@ -59,9 +64,8 @@ wildcard_constraints:
 filetypes = "reads annotation".split()
 
 
-def _expand(functions):
-
-    path = "{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}_time.txt"
+def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}_time.txt",
+            sizes=sizes, iterations=iterations, filetypes=filetypes, num_cores=num_cores):
 
     outfiles = []
     for function in functions:
@@ -129,6 +133,8 @@ category_dict = {"single": single_pyranges_files,
                  "tree": tree_files}
 
 
+# print(rle_map)
+# raise
 def correct_file(w):
 
     ft = w.filetype
@@ -140,10 +146,10 @@ def correct_file(w):
 
 
 for rule in glob.glob("rules/*.smk"):
-    # print("including: " + rule, file=sys.stderr)
+    print("including: " + rule, file=sys.stderr)
 
     # line to comment in if you want to rerun analyses with -F without regenerating the data
-    if "generate_data" in rule: continue
+    # if "generate_data" in rule: continue
 
     # never want to redownload data
     if "download" in rule: continue

@@ -1,0 +1,20 @@
+bioconductor:
+  add: |
+    result = c(c1p + c2p, c1m + c2m)
+  subtract:
+    result = c(c1p - c2p, c1m - c2m)
+  divide: |
+    result = c(c1p / c2p, c1m / c2m)
+  multiply:
+    result = c(c1p * c2p, c1m * c2m)
+
+
+pyranges:
+  add:
+    "result = c1 + c2"
+  subtract:
+    "result = c1 - c2"
+  divide:
+    "result = c1 / c2"
+  multiply:
+    "result = c1 * c2"

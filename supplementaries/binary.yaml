@@ -50,11 +50,12 @@ pybedtools:
     sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
     sb = pb2.sort().merge(s=True, c=[4, 5, 6], o="first")
     result = sc.intersect(sb, s=True)
-  set_union:
+  set_union: |
     # the first flag is needed to keep the sixth columns
     sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
     sb = pb2.sort().merge(s=True, c=[4, 5, 6], o="first")
-    result = sc.merge(sb, s=True)
+    catted = sc.cat(sb, s=True, c=[4, 5, 6], o="first").sort()
+    result = catted.merge(s=True, c=[4, 5, 6], o="first")
   join:
     result = pb1.intersect(pb2, wao=True)
   subtract:
@@ -71,7 +72,7 @@ pyranges:
   nearest:
     result = gr.nearest(gr2, strandedness="same")
   nearest_nonoverlapping:
-    result = gr.nearest_nonoverlapping(gr2, strandedness="same")
+    result = gr.nearest(gr2, strandedness="same", overlap=False)
   set_intersect: |
     result = gr.set_intersect(gr2, strandedness="same")
   set_union: |

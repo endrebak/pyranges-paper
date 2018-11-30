@@ -7,18 +7,19 @@ from time import time
 import datetime
 import numpy as np
 
-chip = file_to_coverage(snakemake.input.chip)
-background = file_to_coverage(snakemake.input.background)
+c1 = file_to_coverage(snakemake.input.chip)
+c2 = file_to_coverage(snakemake.input.background)
 
-operation = snakemake.wildcards.rle_operation
+code = snakemake.params.code
 
-pyop = {"add": "__add__", "subtract": "__sub__", "multiply": "__mul__", "divide": "__truediv__"}[operation]
+# pyop = {"add": "__add__", "subtract": "__sub__", "multiply": "__mul__", "divide": "__truediv__"}[operation]
 
-m = getattr(chip, pyop)
+# m = getattr(chip, pyop)
 
 start = time()
 
-result = m(background)
+# result = m(background)
+exec(code)
 
 end = time()
 total = end - start
@@ -29,4 +30,6 @@ minutes_seconds = total_dt.strftime('%-M.%-S.%f')
 
 open(snakemake.output[0], "w+").write(minutes_seconds)
 
-print(result)
+result_string = str(result)
+
+open(snakemake.output.result, "w+").write(result_string)

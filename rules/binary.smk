@@ -1,15 +1,16 @@
 
 
-rule pybedtools_overlap:
+rule pybedtools_binary:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = "{prefix}/data/download/input_{size}.bed.gz",
     output:
         time = "{prefix}/benchmark/{operation}/pybedtools/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{operation}/pybedtools/{filetype}/{iteration}_{size}.result",
     benchmark:
         "{prefix}/benchmark/{operation}/pybedtools/{filetype}/{iteration}_{size}_benchmark.txt"
     params:
-        operation = lambda w: binary_map["pybedtools"][w.operation]
+        code = lambda w: binary_map["pybedtools"][w.operation]
     script:
         "../scripts/pybedtools_binary.py"
 

@@ -56,6 +56,9 @@ rule pybedtools_unary:
         correct_file
     output:
         time = "{prefix}/benchmark/{unary_operation}/pybedtools/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{unary_operation}/pybedtools/{filetype}/{iteration}_{size}.result",
+    benchmark:
+        "{prefix}/benchmark/{unary_operation}/pybedtools/{filetype}/{iteration}_{size}_benchmark.txt"
     params:
         operation = lambda w: unary_map["pybedtools"][w.unary_operation]
     script:

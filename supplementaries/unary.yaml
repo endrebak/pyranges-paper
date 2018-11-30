@@ -9,6 +9,7 @@ bioconductor:
   genomicrange_to_coverage: |
     plus = coverage(gr[gr@strand == "+"])
     minus = coverage(gr[gr@strand == "-"])
+    result = c(plus, minus)
 
 pybedtools:
   cluster:
