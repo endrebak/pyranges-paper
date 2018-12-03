@@ -4,7 +4,7 @@
 rule pyranges_rle_arithmetic:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
-        background = "{prefix}/data/download/input_{size}.bed.gz",
+        background = correct_file,
     output:
         time = "{prefix}/benchmark/rle_{rle_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
         result = "{prefix}/benchmark/rle_{rle_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}.result",
@@ -19,7 +19,7 @@ rule pyranges_rle_arithmetic:
 rule bioconductor_rle_arithmetic:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
-        background = "{prefix}/data/download/input_{size}.bed.gz",
+        background = correct_file,
     output:
         time = "{prefix}/benchmark/rle_{rle_operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt",
         result = "{prefix}/benchmark/rle_{rle_operation}/bioconductor/{filetype}/{iteration}_{size}.result"

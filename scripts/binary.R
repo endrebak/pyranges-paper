@@ -2,29 +2,27 @@ source("scripts/helpers.R")
 
 library(GenomicRanges)
 
-operation = snakemake@params[["code"]]
+code = snakemake@params[["code"]]
 
-"operation is stored in f, behind the scenes"
-operation = paste0("f <- function(gr1, gr2){\n", operation, "\nreturn(result)}")
-print(paste0("Performing operation ", operation, " for ", snakemake@wildcards[["operation"]]))
-eval(parse(text=operation))
-## f = match.fun()
+print("code")
+print(code)
 
 fc = snakemake@input[["chip"]]
 fb = snakemake@input[["background"]]
 
-chip = file_to_grange(fc)
-background = file_to_grange(fb)
+gr1 = file_to_grange(fc)
+## print(gr1)
+gr2 = file_to_grange(fb, filetype=snakemake@wildcards[["filetype"]])
 
 start.time <- Sys.time()
-result = f(chip, background)
+eval(parse(text=code))
 end.time <- Sys.time()
 
-time.taken <- end.time - start.time
-
+time.taken = end.time - start.time
 time.taken <- as.numeric(time.taken, units="secs")
 
-write(time.taken, file=snakemake@output[[1]])
+write(time.taken, file=snakemake@output[["time"]])
+
 
 
 result_string = capture.output(print(result))

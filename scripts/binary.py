@@ -8,8 +8,8 @@ code = snakemake.params.code
 
 f = snakemake.input[0]
 f2 = snakemake.input[1]
-gr = file_to_grange(f)
-gr2 = file_to_grange(f2)
+gr = file_to_grange(f2, filetype=snakemake.wildcards.filetype)
+gr2 = file_to_grange(f)
 
 # m = getattr(gr, operation)
 

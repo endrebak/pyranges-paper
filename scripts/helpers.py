@@ -1,5 +1,6 @@
 import ray
 
+
 def init_ray(w):
     num_cores = int(w.num_cores)
     if num_cores != 1:
@@ -27,17 +28,23 @@ def read_file(f, dtype=np.int32):
     return df
 
 
-def file_to_grange(f, dtype=np.int32):
+def file_to_grange(f, dtype=np.int32, filetype="reads"):
 
-    from pyranges import PyRanges
-    df = read_file(f, dtype)
+    from pyranges import PyRanges, read_gtf
 
     if dtype == np.int64:
         extended = True
     else:
         extended = False
 
-    return PyRanges(df, extended=extended)
+    if filetype == "reads":
+        df = read_file(f, dtype)
+        gr = PyRanges(df, extended=extended)
+    elif filetype == "annotation":
+        gr = read_gtf(f)
+
+    return gr
+
 
 
 def file_to_coverage(f, dtype=np.int64):

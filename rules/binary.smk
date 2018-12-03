@@ -3,7 +3,7 @@
 rule pybedtools_binary:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
-        background = "{prefix}/data/download/input_{size}.bed.gz",
+        background = correct_file
     output:
         time = "{prefix}/benchmark/{operation}/pybedtools/{filetype}/{iteration}_{size}_time.txt",
         result = "{prefix}/benchmark/{operation}/pybedtools/{filetype}/{iteration}_{size}.result",
@@ -18,7 +18,7 @@ rule pybedtools_binary:
 rule pyranges_binary:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
-        background = "{prefix}/data/download/input_{size}.bed.gz",
+        background = correct_file
     output:
         time = "{prefix}/benchmark/{operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
         result = "{prefix}/benchmark/{operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}.result",
@@ -29,18 +29,25 @@ rule pyranges_binary:
     script:
         "../scripts/binary.py"
 
+def correct_bioc_code(w):
+
+    if w.type == "basic":
+        return binary_map["bioconductor"][w.operation]["basic"]
+    else:
+        return binary_map["bioconductor"][w.operation]["basic"] + binary_map["bioconductor"][w.operation]["full"]
+
 
 rule bioconductor_binary:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
-        background = "{prefix}/data/download/input_{size}.bed.gz",
+        background = correct_file
     output:
-        time = "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt",
-        result = "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}.result",
+        time = "{prefix}/benchmark/{operation}/bioconductor_{type}/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{operation}/bioconductor_{type}/{filetype}/{iteration}_{size}.result",
     benchmark:
-        "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt",
+        "{prefix}/benchmark/{operation}/bioconductor_{type}/{filetype}/{iteration}_{size}_benchmark.txt",
     params:
-        code = lambda w: binary_map["bioconductor"][w.operation]
+        code = correct_bioc_code
     script:
         "../scripts/binary.R"
 

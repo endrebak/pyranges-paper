@@ -19,6 +19,8 @@ rle_map = yaml.load(open("supplementaries/rle.yaml"))
 unary_map = yaml.load(open("supplementaries/unary.yaml"))
 tree_map = yaml.load(open("supplementaries/tree.yaml"))
 
+category_code = {"tree": tree_map, "unary": unary_map, "rle": rle_map, "binary": binary_map}
+
 if not environ.get("TMUX"):
     raise Exception("Not using TMUX!")
 
@@ -27,8 +29,8 @@ import platform
 prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
 iterations = [0, 1] # range(3)
 libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48 bx-python".split()
-sizes = [int(f) for f in [1e6, 1e7, 1e8]] #, 1e9, 1e10]]
-pybedtool_sizes = [int(f) for f in [1e6, 1e7]] #, 1e9, 1e10]]
+sizes = [int(f) for f in [1e5, 1e6, 1e7, 1e8]] #, 1e9, 1e10]]
+pybedtool_sizes = [int(f) for f in [1e5, 1e6, 1e7]] #, 1e9, 1e10]]
 
 # print(binary_map["pybedtools"])
 
@@ -39,10 +41,13 @@ def regex(lst):
 sort = ["sorted"]
 num_cores = [1, 2, 4, 8, 24, 48]
 
-# num_cores = [1]
-
-# sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
-# pybedtool_sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
+small_run = True
+if small_run:
+    filetypes = "annotation"
+    num_cores = [1]
+    sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
+    pybedtool_sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
+    iterations = [0]
 
 # print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
 # raise
@@ -52,7 +57,7 @@ wildcard_constraints:
     filetype = regex("reads annotation".split()),
     unary_operation = regex(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"])),
     operation = regex(list(binary_map["pybedtools"]) + list(binary_map["bioconductor"])),
-    tree_operation = regex(list(tree_map["pyranges"]) + list(tree_map["bx-python"])),
+    tree_operation = regex(list(tree_map["ncls"]) + list(tree_map["bx-python"])),
     rle_operation = regex(rle_map["pyranges"])
     # size = regex(sizes),
     # iteration = regex(iterations),
@@ -72,12 +77,14 @@ def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/
         # print("----" * 5)
         # print("function", function)
         libraries = list(ss[ss["Function"] == function].Library)
+        category = ss[ss["Function"] == function].Category.iloc[0]
+        # print(libraries)
 
         multicore = ss[(ss.Function == function) & (ss.Library == "pyranges")].Multicore
         assert len(multicore) < 2
         if len(multicore) == 1:
             multicore = multicore.iloc[0]
-            category = ss[(ss.Function == function) & (ss.Library == "pyranges")].Category.iloc[0]
+            # category = ss[(ss.Function == function) & (ss.Library == "pyranges")].Category.iloc[0]
         else:
             multicore = 0
 

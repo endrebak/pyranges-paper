@@ -28,9 +28,15 @@ get_df <- function (f){
   return(df)
 }
 
-file_to_grange <- function(f){
-  df <- get_df(f)
-  return(GRanges(seqnames = df$Chromosome, ranges = IRanges(start = df$Start, end = df$End), strand = df$Strand))
+file_to_grange <- function(f, filetype="reads"){
+  if (filetype == "reads"){
+    df <- get_df(f)
+    return(GRanges(seqnames = df$Chromosome, ranges = IRanges(start = df$Start, end = df$End), strand = df$Strand))
+  } else {
+    library(rtracklayer)
+    return(import(f))
+  }
+
 }
 
 file_to_coverage <- function(f, strand){

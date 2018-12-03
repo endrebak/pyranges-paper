@@ -25,7 +25,7 @@ rule collect_times:
 
             timing = open(f).readlines()[0].strip()
 
-            if library != "bioconductor":
+            if "bioconductor" not in library:
                 minutes, seconds, fraction = timing.split(".")
                 minutes, seconds = int(minutes), int(seconds)
                 seconds += minutes * 60

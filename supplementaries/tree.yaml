@@ -9,7 +9,7 @@ bx-python:
         results.append(tree.search(start_, end_))
 
 
-pyranges:
+ncls:
   tree_build: |
     tree = NCLS(df2.Start.values, df2.End.values, df2.index.values)
   tree_overlap:

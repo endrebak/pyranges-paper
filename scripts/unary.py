@@ -8,10 +8,10 @@ operation = snakemake.wildcards.unary_operation
 f = snakemake.input[0]
 
 if operation != "dataframe_to_genomicrange":
-    gr = file_to_grange(f)
+    gr = file_to_grange(f, filetype=snakemake.wildcards.filetype)
 else:
     from pyranges import PyRanges
-    df = read_file(f)
+    df = read_file(f, filetype=snakemake.wildcards.filetype)
 
 print(snakemake.params.code)
 start = time()

@@ -38,3 +38,7 @@ total_dt = datetime.datetime.fromtimestamp(total)
 minutes_seconds = total_dt.strftime('%-M.%-S.%f')
 
 open(snakemake.output[0], "w+").write(minutes_seconds)
+
+# result_string = str(result)
+
+open(snakemake.output.result, "w+").write("")
