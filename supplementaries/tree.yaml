@@ -4,13 +4,14 @@ bx-python:
     for start_, end_ in zip(df2.Start, df2.End):
         tree.add(start_, end_)
   tree_overlap: |
-    results = []
+    result = []
     for start_, end_ in zip(df1.Start, df1.End):
-        results.append(tree.search(start_, end_))
+        result.append(tree.search(start_, end_))
 
 
 ncls:
   tree_build: |
     tree = NCLS(df2.Start.values, df2.End.values, df2.index.values)
-  tree_overlap:
-    result = tree.all_overlaps_both(df1.Start.values, df1.End.values, df1.index.values)
+  tree_overlap: |
+    result = tree.all_overlaps_self(df1.Start.values, df1.End.values, df1.index.values)
+    result = df2.iloc[result]

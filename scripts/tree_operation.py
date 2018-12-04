@@ -17,7 +17,13 @@ df2 = pd.read_table(b, sep="\t",
                     usecols=[1, 2], header=None, names="Start End".split(), engine="c",
                     dtype={"Start": np.int32, "End": np.int32} )
 
-if snakemake.wildcards.tree_operation == "tree_build":
+w = snakemake.wildcards
+build = snakemake.wildcards.tree_operation == "tree_build"
+
+print(snakemake.params.build_code)
+print(snakemake.params.overlaps_code)
+
+if build:
 
     start = time()
     exec(snakemake.params.build_code)
@@ -40,5 +46,13 @@ minutes_seconds = total_dt.strftime('%-M.%-S.%f')
 open(snakemake.output[0], "w+").write(minutes_seconds)
 
 # result_string = str(result)
+if build:
 
-open(snakemake.output.result, "w+").write("")
+    open(snakemake.output.result, "w+").write(str(tree))
+
+else:
+
+    if w.library == "bx-python":
+        open(snakemake.output.result, "w+").write(str([result[:5]]))
+    else:
+        df2.head().to_csv(snakemake.output.result, sep="\t")

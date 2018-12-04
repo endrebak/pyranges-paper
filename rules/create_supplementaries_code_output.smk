@@ -3,6 +3,7 @@ from natsort import natsorted
 
 def supps(w):
 
+    # print("w: ", w)
     results = _expand(ss[ss.Category == w.category].Function,
                       "{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}.result",
                       iterations=iterations[:1],
@@ -29,11 +30,12 @@ rule create_test_md:
             function, library = f.split("/")[-4:-2]
             library = library.replace("_1", "")
 
-            if "bioconductor" not in library:
-                code_dict[function][library] = category_code[category][library][function]
-            else:
+            if category == "binary" and "bioconductor" in library:
                 bioc, bioc_type = library.split("_")
                 code_dict[function][library] = category_code[category][bioc][function][bioc_type]
+            else:
+                code_dict[function][library] = category_code[category][library][function]
+
             result_dict[function][library] = "".join(open(f).readlines())
 
             # print(function, library)
@@ -47,14 +49,16 @@ rule create_test_md:
             for library, code in natsorted(lib_dict.items()):
                 outfile.write("## " + library + "\n\n")
                 outfile.write("#### Code:\n\n")
-                outfile.write("```\n" + lib_dict[library] + "\n```\n\n")
+                if library != "bioconductor_full":
+                    outfile.write("```\n" + lib_dict[library] + "\n```\n\n")
+                else:
+                    outfile.write("```\n" + lib_dict["bioconductor_basic"] + "\n" + lib_dict["bioconductor_full"] + "\n```\n\n")
 
                 if result_dict[function][library] != "":
                     outfile.write("#### Result:\n\n")
                     outfile.write("```\n" + result_dict[function][library] + "\n```\n\n")
 
-
-
+            outfile.write("\\newpage\n")
 
         outfile.close()
 

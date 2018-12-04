@@ -107,14 +107,19 @@ def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/
         #     print(function)
         #     print("larger_libs", larger_libs)
         #     print("smaller_libs", smaller_libs)
+        # print(function)
+        # print(libraries)
+        # print(filetypes)
 
         _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype=filetypes) + \
             expand(path, function=function, prefix=prefix, iteration=iterations, size=pybedtool_sizes, library=smaller_libs, filetype=filetypes)
+
         # for f in _outfiles:
         #     if "dataframe" in f and "pybedtools" in f:
         #         print(f)
         outfiles.extend(_outfiles)
 
+    # print(outfiles)
     return outfiles
 
 
