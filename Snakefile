@@ -17,6 +17,7 @@ ss = pd.read_table("sample_sheet.txt", sep=" ", header=0)
 binary_map = yaml.load(open("supplementaries/binary.yaml"))
 rle_map = yaml.load(open("supplementaries/rle.yaml"))
 unary_map = yaml.load(open("supplementaries/unary.yaml"))
+io_map = yaml.load(open("supplementaries/io.yaml"))
 tree_map = yaml.load(open("supplementaries/tree.yaml"))
 
 category_code = {"tree": tree_map, "unary": unary_map, "rle": rle_map, "binary": binary_map}
@@ -29,7 +30,7 @@ import platform
 prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
 iterations = [0, 1] # range(3)
 libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48 bx-python".split()
-sizes = [int(f) for f in [1e5, 1e6, 1e7, 1e8]] #, 1e9, 1e10]]
+sizes = [int(f) for f in [1e5, 1e6, 1e7]] #, 1e8]] #, 1e9, 1e10]]
 pybedtool_sizes = [int(f) for f in [1e5, 1e6, 1e7]] #, 1e9, 1e10]]
 
 # print(binary_map["pybedtools"])
@@ -41,7 +42,10 @@ def regex(lst):
 sort = ["sorted"]
 num_cores = [1, 2, 4, 8, 24, 48]
 
-small_run = True
+filetypes = "reads annotation".split()
+filetypes = ["annotation"]
+
+small_run = False
 if small_run:
     filetypes = "annotation"
     num_cores = [1]
@@ -53,20 +57,30 @@ if small_run:
 # raise
 
 # print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
+unary_ops = list(unary_map["pybedtools"]) + list(unary_map["bioconductor"])
+binary_ops = list(binary_map["pybedtools"]) + list(binary_map["bioconductor"])
+tree_ops = list(tree_map["ncls"]) + list(tree_map["bx-python"])
+rle_ops = list(rle_map["pyranges"])
+io_ops = list(io_map["pyranges"])
+# print(unary_ops)
+# print(binary_ops)
+# print(tree_ops)
+# print(rle_ops)
+
 wildcard_constraints:
     filetype = regex("reads annotation".split()),
-    unary_operation = regex(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"])),
-    operation = regex(list(binary_map["pybedtools"]) + list(binary_map["bioconductor"])),
-    tree_operation = regex(list(tree_map["ncls"]) + list(tree_map["bx-python"])),
-    rle_operation = regex(rle_map["pyranges"])
+    unary_operation = regex(unary_ops),
+    operation = regex(binary_ops),
+    tree_operation = regex(tree_ops),
+    rle_operation = regex(rle_ops),
+    io_operation = regex(io_ops),
+    libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
     # size = regex(sizes),
     # iteration = regex(iterations),
-    # libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
     # num_cores = regex(num_cores),
     # subset = "(''|_subset)"
 
 # genomicranges_pyranges_only = "pyranges bioconductor".split()
-filetypes = "reads annotation".split()
 
 
 def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}_time.txt",
@@ -103,23 +117,11 @@ def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/
         else:
             _sizes = sizes
 
-        # if "dataframe" in function:
-        #     print(function)
-        #     print("larger_libs", larger_libs)
-        #     print("smaller_libs", smaller_libs)
-        # print(function)
-        # print(libraries)
-        # print(filetypes)
-
         _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype=filetypes) + \
             expand(path, function=function, prefix=prefix, iteration=iterations, size=pybedtool_sizes, library=smaller_libs, filetype=filetypes)
 
-        # for f in _outfiles:
-        #     if "dataframe" in f and "pybedtools" in f:
-        #         print(f)
         outfiles.extend(_outfiles)
 
-    # print(outfiles)
     return outfiles
 
 

@@ -1,17 +1,12 @@
 bioconductor:
-  intersect:
-    basic: |
+  intersect: |
       pairs = findOverlapPairs(gr2, gr1, ignore.strand = FALSE)
       result = pintersect(pairs, ignore.strand = FALSE)
       result = result[mcols(result)$hit == TRUE]
-  overlap:
-    basic: |
+  overlap: |
       result = findOverlapPairs(gr2, gr1, ignore.strand = FALSE)
       result = first(result)
-  nearest:
-    basic: |
-      result = distanceToNearest(gr2, gr1, ignore.strand = FALSE, select="arbitrary")
-    full: |
+  nearest: |
       subject = as.data.frame(gr1[subjectHits(result)])
       colnames(subject) = paste0(colnames(subject), "_b")
       query = as.data.frame(gr2[queryHits(result)])
@@ -20,49 +15,18 @@ bioconductor:
       df = merge(df, mcols(result)$distance, by=0)
       df = df[, -1]
       result = makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
-  nearest_nonoverlapping:
-    basic: |
-      fun <- function(x) {min(x) == x & !duplicated(x)}
-
-      result <- union(
-      # there is a bug in this method (suggested by the developers), so does not work with returning only single query
-      # must use all. see https://support.bioconductor.org/p/110506/
-      precede(gr1, gr2, select="all"),
-      follow(gr1, gr2, select="all")
-      )
-      ## minimum distance by query
-    full: |
-      distance <- distance(gr1[queryHits(result)], gr2[subjectHits(result)])
-      lst <- splitAsList(distance, queryHits(result))
-      keep <- unsplit(fun(lst), queryHits(result))
-      ## clean-up
-      mcols(result)$distance <- distance
-      result = result[keep]
-      subject = as.data.frame(gr1[subjectHits(result)])
-      colnames(subject) = paste0(colnames(subject), "_b")
-      query = as.data.frame(gr2[queryHits(result)])
-      df = merge(subject, query, by=0)
-      df = df[, -1]
-      df = merge(df, mcols(result)$distance, by=0)
-      df = df[, -1]
-      result = makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
-  set_intersect:
-    basic: |
+  set_intersect: |
       result = intersect(gr2, gr1)
-  set_union:
-    basic: |
+  set_union: |
       result = union(gr1, gr2)
-  join:
-    basic: |
+  join: |
       result <- findOverlapPairs(gr1, gr2, ignore.strand = FALSE)
-    full: |
       df1 = as.data.frame(first(result))
       df2 = as.data.frame(second(result))
       colnames(df2) = paste0(colnames(df2), "_b")
       df = merge(df1, df2, by=0)
       result = makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
-  subtract:
-    basic: |
+  subtract: |
       hits <- findOverlaps(gr2, gr1, ignore.strand = FALSE)
       toSubtract <- reduce(extractList(gr1, as(hits, "List")),
           ignore.strand = FALSE)

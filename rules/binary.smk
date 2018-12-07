@@ -29,25 +29,18 @@ rule pyranges_binary:
     script:
         "../scripts/binary.py"
 
-def correct_bioc_code(w):
-
-    if w.type == "basic":
-        return binary_map["bioconductor"][w.operation]["basic"]
-    else:
-        return binary_map["bioconductor"][w.operation]["basic"] + binary_map["bioconductor"][w.operation]["full"]
-
 
 rule bioconductor_binary:
     input:
         chip = "{prefix}/data/download/chip_{size}.bed.gz",
         background = correct_file
     output:
-        time = "{prefix}/benchmark/{operation}/bioconductor_{type}/{filetype}/{iteration}_{size}_time.txt",
-        result = "{prefix}/benchmark/{operation}/bioconductor_{type}/{filetype}/{iteration}_{size}.result",
+        time = "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt",
+        result = "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}.result",
     benchmark:
-        "{prefix}/benchmark/{operation}/bioconductor_{type}/{filetype}/{iteration}_{size}_benchmark.txt",
+        "{prefix}/benchmark/{operation}/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt",
     params:
-        code = correct_bioc_code
+        code = lambda w: binary_map["bioconductor"][w.operation]
     script:
         "../scripts/binary.R"
 

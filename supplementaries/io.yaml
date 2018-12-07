@@ -1,8 +1,17 @@
 bioconductor:
   read_bed: |
-    result = reduce(gr)
-  read_bam: |
-    result = sortSeqlevels(gr)
-    result = sort(result)
-  read_gff: |
-    result = coverage(gr)
+    result = import(file)
+  # read_bam: |
+  #   result = sortSeqlevels(gr)
+  #   result = sort(result)
+  read_gtf: |
+    result = import(file)
+
+pyranges:
+  read_bed: |
+    pr.read_bed(f)
+  # read_bam: |
+  #   result = sortSeqlevels(gr)
+  #   result = sort(result)
+  read_gtf: |
+    pr.read_gtf(f)

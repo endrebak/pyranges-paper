@@ -7,6 +7,8 @@ rule tree_operation:
         result = "{prefix}/benchmark/{tree_operation}/{library}/{filetype}/{iteration}_{size}.result",
     benchmark:
         "{prefix}/benchmark/{tree_operation}/{library}/{filetype}/{iteration}_{size}_benchmark.txt"
+    wildcard_constraints:
+        tree_operation = regex(tree_ops)
     params:
         build_code = lambda w: tree_map[w.library]["tree_build"] if w.library == "bx-python" else tree_map["ncls"]["tree_build"],
         overlaps_code = lambda w: tree_map[w.library]["tree_overlap"] if w.library == "bx-python" else tree_map["ncls"]["tree_overlap"]

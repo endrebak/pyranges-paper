@@ -33,6 +33,8 @@ rule pyranges_unary:
         "{prefix}/benchmark/{unary_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_benchmark.txt"
     params:
         code = lambda w: unary_map["pyranges"][w.unary_operation]
+    wildcard_constraints:
+        unary_operation = regex(unary_ops)
     script:
         "../scripts/unary.py"
 
@@ -47,6 +49,8 @@ rule bioconductor_unary:
         "{prefix}/benchmark/{unary_operation}/bioconductor/{filetype}/{iteration}_{size}_benchmark.txt"
     params:
         operation = lambda w: unary_map["bioconductor"][w.unary_operation]
+    wildcard_constraints:
+        unary_operation = regex(unary_ops)
     script:
         "../scripts/unary.R"
 
@@ -61,6 +65,8 @@ rule pybedtools_unary:
         "{prefix}/benchmark/{unary_operation}/pybedtools/{filetype}/{iteration}_{size}_benchmark.txt"
     params:
         operation = lambda w: unary_map["pybedtools"][w.unary_operation]
+    wildcard_constraints:
+        unary_operation = regex(unary_ops)
     script:
         "../scripts/pybedtools_unary.py"
 

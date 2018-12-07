@@ -30,17 +30,10 @@ rule create_test_md:
             function, library = f.split("/")[-4:-2]
             library = library.replace("_1", "")
 
-            if category == "binary" and "bioconductor" in library:
-                bioc, bioc_type = library.split("_")
-                code_dict[function][library] = category_code[category][bioc][function][bioc_type]
-            else:
-                code_dict[function][library] = category_code[category][library][function]
+            code_dict[function][library] = category_code[category][library][function]
 
             result_dict[function][library] = "".join(open(f).readlines())
 
-            # print(function, library)
-
-            # raise
         outfile = open(output[0], "w+")
         for function, lib_dict in natsorted(code_dict.items()):
 
@@ -49,10 +42,7 @@ rule create_test_md:
             for library, code in natsorted(lib_dict.items()):
                 outfile.write("## " + library + "\n\n")
                 outfile.write("#### Code:\n\n")
-                if library != "bioconductor_full":
-                    outfile.write("```\n" + lib_dict[library] + "\n```\n\n")
-                else:
-                    outfile.write("```\n" + lib_dict["bioconductor_basic"] + "\n" + lib_dict["bioconductor_full"] + "\n```\n\n")
+                outfile.write("```\n" + lib_dict[library] + "\n```\n\n")
 
                 if result_dict[function][library] != "":
                     outfile.write("#### Result:\n\n")
