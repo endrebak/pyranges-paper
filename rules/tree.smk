@@ -10,7 +10,7 @@ rule tree_operation:
     wildcard_constraints:
         tree_operation = regex(tree_ops)
     params:
-        build_code = lambda w: tree_map[w.library]["tree_build"] if w.library == "bx-python" else tree_map["ncls"]["tree_build"],
-        overlaps_code = lambda w: tree_map[w.library]["tree_overlap"] if w.library == "bx-python" else tree_map["ncls"]["tree_overlap"]
+        build_code = lambda w: tree_map[w.library.replace("pyranges_1", "ncls")]["tree_build"],
+        overlaps_code = lambda w: tree_map[w.library.replace("pyranges_1", "ncls")]["tree_overlap"]
     script:
         "../scripts/tree_operation.py"

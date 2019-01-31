@@ -4,9 +4,9 @@ import ray
 def init_ray(w):
     num_cores = int(w.num_cores)
     if num_cores != 1:
-        ray.init(num_cpus=num_cores)
+        ray.init(num_cpus=num_cores, object_store_memory=int(7e10), ignore_reinit_error=True)
     else:
-        ray.init(local_mode=True, num_cpus=1) # logging_level=logging.CRITICAL # local_mode=True
+        ray.init(local_mode=True, num_cpus=1, ignore_reinit_error=True) # logging_level=logging.CRITICAL # local_mode=True
 
 import pandas as pd
 import numpy as np
@@ -21,7 +21,7 @@ def read_file(f, dtype=np.int32):
     cols = d[ext]
 
     # print("using dtype: ", dtype)
-    df = pd.read_table(f, sep="\t", usecols=cols,
+    df = pd.read_csv(f, sep="\t", usecols=cols,
                          header=None, names="Chromosome Start End Strand".split(),
                          dtype={"Chromosome": "category", "Strand": "category", "Start": dtype, "End": dtype})
 
@@ -41,7 +41,7 @@ def file_to_grange(f, dtype=np.int32, filetype="reads"):
         df = read_file(f, dtype)
         gr = PyRanges(df, extended=extended)
     elif filetype == "annotation":
-        gr = read_gtf(f)
+        gr = read_gtf(f, annotation="ensembl")
 
     return gr
 

@@ -7,6 +7,7 @@ bioconductor:
       result = findOverlapPairs(gr2, gr1, ignore.strand = FALSE)
       result = first(result)
   nearest: |
+      result = distanceToNearest(gr2, gr1, ignore.strand = FALSE, select="arbitrary")
       subject = as.data.frame(gr1[subjectHits(result)])
       colnames(subject) = paste0(colnames(subject), "_b")
       query = as.data.frame(gr2[queryHits(result)])

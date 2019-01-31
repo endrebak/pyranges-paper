@@ -52,9 +52,9 @@ if int(w.size) == int(1e5) and int(w.iteration) == 0:
     path = "{prefix}/benchmark/actual_results/{function}/{filetype}/pybedtools.txt".format(prefix=w.prefix, function=w.operation, filetype=w.filetype)
     # print(path)
     import subprocess, os
-    result.head()
-    subprocess.check_output("mkdir -p " + os.path.dirname(path), shell=True)
     try:
+        result.head()
+        subprocess.check_output("mkdir -p " + os.path.dirname(path), shell=True)
         print("saving to path")
         result.saveas(path)
     except:

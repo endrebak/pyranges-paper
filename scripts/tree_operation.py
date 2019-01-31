@@ -9,11 +9,11 @@ import numpy as np
 c = snakemake.input.chip
 b = snakemake.input.background
 
-df1 = pd.read_table(b, sep="\t",
+df1 = pd.read_csv(b, sep="\t",
                     usecols=[1, 2], header=None, names="Start End".split(), engine="c",
                     dtype={"Start": np.int32, "End": np.int32} )
 
-df2 = pd.read_table(b, sep="\t",
+df2 = pd.read_csv(b, sep="\t",
                     usecols=[1, 2], header=None, names="Start End".split(), engine="c",
                     dtype={"Start": np.int32, "End": np.int32} )
 

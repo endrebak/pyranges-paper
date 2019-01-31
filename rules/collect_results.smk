@@ -1,9 +1,7 @@
 
 def get_files(w):
-    # print("category", w.category)
 
-
-    return [f for f in category_dict[w.category]]
+    return [f for f in category_dict[w.category] if "/" + w.filetype + "/" in f]
 
 
 rule collect_times:
@@ -33,16 +31,12 @@ rule collect_times:
                 timing = ".".join(str(s) for s in [seconds, fraction])
 
             timing = np.log10(float(timing))
-            try:
-                max_rss = pd.read_table(bmark_f, sep="\t", usecols=[2], skiprows=1, squeeze=True, header=None).values[0] / 1024
 
-                rowdict = {"Iteration": iteration, "MaxRSSGB": max_rss,
-                           "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
-                           np.log10(size)}
-            # because maxrssgb does not work on macOS
-            except:
-                rowdict = {"Iteration": iteration, "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
-                           np.log10(size)}
+            max_rss = pd.read_csv(bmark_f, sep="\t", usecols=[2], skiprows=1, squeeze=True, header=None).values[0] / 1024
+
+            rowdict = {"Iteration": iteration, "MaxRSSGB": max_rss,
+                        "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
+                        np.log10(size)}
 
 
             rowdicts.append(rowdict)
@@ -51,12 +45,8 @@ rule collect_times:
         print(df.head())
         df = df.sort_values("Function Library Log10NBIntervals".split())
 
-        try:
-            column_order = "Function Library Log10NBIntervals MaxRSSGB Seconds Iteration".split()
-            df[column_order].to_csv(output[0], index=False, sep="\t")
-        except:
-            column_order = "Function Library Log10NBIntervals Seconds Iteration".split()
-            df[column_order].to_csv(output[0], index=False, sep="\t")
+        column_order = "Function Library Log10NBIntervals MaxRSSGB Seconds Iteration".split()
+        df[column_order].to_csv(output[0], index=False, sep="\t")
 
 
 rule find_mean_times:
@@ -65,7 +55,7 @@ rule find_mean_times:
     output:
         "{prefix}/benchmark/collected_timings_mean_{filetype}_{category}.txt"
     run:
-        df = pd.read_table(input[0], sep="\t", header=0)
+        df = pd.read_csv(input[0], sep="\t", header=0)
 
         rowdicts = []
         for g, gdf in df.groupby("Function Library Log10NBIntervals".split()):
@@ -73,12 +63,12 @@ rule find_mean_times:
             seconds = gdf.Seconds.mean()
             seconds_sd = gdf.Seconds.std()
             memory = gdf.MaxRSSGB.mean()
-            print(g)
-            print(gdf)
-            print(gdf.MaxRSSGB)
+            # print(g)
+            # print(gdf)
+            # print(gdf.MaxRSSGB)
             memory_sd = gdf.MaxRSSGB.std()
-            print(memory_sd)
-            print("-------")
+            # print(memory_sd)
+            # print("-------")
 
             head = gdf.head(1)
             rowdict = {}

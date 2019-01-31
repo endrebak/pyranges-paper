@@ -1,20 +1,20 @@
 bioconductor:
-  add: |
+  rle_add: |
     result = c(c1p + c2p, c1m + c2m)
-  subtract:
+  rle_subtract:
     result = c(c1p - c2p, c1m - c2m)
-  divide: |
+  rle_divide: |
     result = c(c1p / c2p, c1m / c2m)
-  multiply:
+  rle_multiply:
     result = c(c1p * c2p, c1m * c2m)
 
 
 pyranges:
-  add:
+  rle_add:
     "result = c1 + c2"
-  subtract:
+  rle_subtract:
     "result = c1 - c2"
-  divide:
+  rle_divide:
     "result = c1 / c2"
-  multiply:
+  rle_multiply:
     "result = c1 * c2"

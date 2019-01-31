@@ -34,8 +34,10 @@ binary join pybedtools 0
 binary join bioconductor 0
 tree tree_build ncls 0
 tree tree_build bx-python 0
+# tree tree_build pandas 0
 tree tree_overlap ncls 0
 tree tree_overlap bx-python 0
+# tree tree_overlap pandas 0
 rle rle_divide bioconductor 0
 rle rle_divide pyranges 1
 rle rle_add bioconductor 0
@@ -44,3 +46,9 @@ rle rle_subtract bioconductor 0
 rle rle_subtract pyranges 1
 rle rle_multiply bioconductor 0
 rle rle_multiply pyranges 1
+io read_bed pyranges 0
+io read_bam pyranges 0
+io read_gtf pyranges 0
+io read_bed bioconductor 0
+io read_bam bioconductor 0
+io read_gtf bioconductor 0

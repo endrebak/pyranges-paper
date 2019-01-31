@@ -2,7 +2,7 @@ source("scripts/helpers.R")
 
 library(rtracklayer)
 
-operation = snakemake@params[["io_operation"]]
+operation = snakemake@params[["operation"]]
 operation = paste0("f <- function(gr){\n", operation, "\nreturn(result)}")
 print(paste0("Performing operation ", operation, " for ", snakemake@wildcards[["unary_operation"]]))
 

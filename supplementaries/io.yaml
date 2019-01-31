@@ -1,17 +1,15 @@
 bioconductor:
   read_bed: |
     result = import(file)
-  # read_bam: |
-  #   result = sortSeqlevels(gr)
-  #   result = sort(result)
+  read_bam: |
+    result = import(file)
   read_gtf: |
     result = import(file)
 
 pyranges:
   read_bed: |
-    pr.read_bed(f)
-  # read_bam: |
-  #   result = sortSeqlevels(gr)
-  #   result = sort(result)
+    result = pr.read_bed(f)
+  read_bam: |
+    result = pr.read_bam(f)
   read_gtf: |
-    pr.read_gtf(f)
+    result = pr.read_gtf(f, annotation="ensembl")

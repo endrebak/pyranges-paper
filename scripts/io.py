@@ -3,6 +3,8 @@ from helpers import read_file, file_to_grange, init_ray; init_ray(snakemake.wild
 from time import time
 import datetime
 
+import pyranges as pr
+
 operation = snakemake.wildcards.io_operation
 w = snakemake.wildcards
 

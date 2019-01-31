@@ -15,3 +15,14 @@ ncls:
   tree_overlap: |
     result = tree.all_overlaps_self(df1.Start.values, df1.End.values, df1.index.values)
     result = df2.iloc[result]
+
+
+# pandas:
+#   tree_build: |
+#     tree = pd.IntervalIndex.from_arrays(df2.Start, df2.End)
+#   tree_overlap: |
+#     result = []
+#     for start_, end_ in zip(df1.Start, df1.End):
+#         ix = tree.overlaps(pd.Interval(start_, end_))
+#         result.append()
+#     result = df2[result]

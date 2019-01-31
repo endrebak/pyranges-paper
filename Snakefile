@@ -12,7 +12,7 @@ from pyrle import PyRles
 
 from os import environ
 
-ss = pd.read_table("sample_sheet.txt", sep=" ", header=0)
+ss = pd.read_csv("sample_sheet.txt", sep=" ", header=0, comment="#")
 
 binary_map = yaml.load(open("supplementaries/binary.yaml"))
 rle_map = yaml.load(open("supplementaries/rle.yaml"))
@@ -20,16 +20,16 @@ unary_map = yaml.load(open("supplementaries/unary.yaml"))
 io_map = yaml.load(open("supplementaries/io.yaml"))
 tree_map = yaml.load(open("supplementaries/tree.yaml"))
 
-category_code = {"tree": tree_map, "unary": unary_map, "rle": rle_map, "binary": binary_map}
+category_code = {"tree": tree_map, "unary": unary_map, "rle": rle_map, "binary": binary_map, "io": io_map}
 
 if not environ.get("TMUX"):
     raise Exception("Not using TMUX!")
 
-import platform
+# import platform
 
 prefix = "/mnt/scratch/endrebak/pyranges_benchmark"
 iterations = [0, 1] # range(3)
-libraries = "bioconductor pyranges_1 pyranges_2 pyranges_8 pyranges_24 pyranges_48 bx-python".split()
+libraries = "bioconductor pyranges_1 pyranges_4 pyranges_8 bx-python".split() #pyranges_2  pyranges_24 pyranges_48
 sizes = [int(f) for f in [1e5, 1e6, 1e7]] #, 1e8]] #, 1e9, 1e10]]
 pybedtool_sizes = [int(f) for f in [1e5, 1e6, 1e7]] #, 1e9, 1e10]]
 
@@ -40,10 +40,9 @@ def regex(lst):
     return "({})".format("|".join([str(e) for e in lst]))
 
 sort = ["sorted"]
-num_cores = [1, 2, 4, 8, 24, 48]
+num_cores = [1, 4, 8] # 2, 24, 48]
 
 filetypes = "reads annotation".split()
-filetypes = ["annotation"]
 
 small_run = False
 if small_run:
@@ -53,19 +52,12 @@ if small_run:
     pybedtool_sizes = [int(f) for f in [1e5]] #, 1e9, 1e10]]
     iterations = [0]
 
-# print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
-# raise
-
-# print(list(unary_map["pybedtools"]) + list(unary_map["bioconductor"]))
 unary_ops = list(unary_map["pybedtools"]) + list(unary_map["bioconductor"])
 binary_ops = list(binary_map["pybedtools"]) + list(binary_map["bioconductor"])
 tree_ops = list(tree_map["ncls"]) + list(tree_map["bx-python"])
 rle_ops = list(rle_map["pyranges"])
 io_ops = list(io_map["pyranges"])
-# print(unary_ops)
-# print(binary_ops)
-# print(tree_ops)
-# print(rle_ops)
+
 
 wildcard_constraints:
     filetype = regex("reads annotation".split()),
@@ -75,12 +67,6 @@ wildcard_constraints:
     rle_operation = regex(rle_ops),
     io_operation = regex(io_ops),
     libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
-    # size = regex(sizes),
-    # iteration = regex(iterations),
-    # num_cores = regex(num_cores),
-    # subset = "(''|_subset)"
-
-# genomicranges_pyranges_only = "pyranges bioconductor".split()
 
 
 def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}_time.txt",
@@ -117,20 +103,24 @@ def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/
         else:
             _sizes = sizes
 
-        _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype=filetypes) + \
-            expand(path, function=function, prefix=prefix, iteration=iterations, size=pybedtool_sizes, library=smaller_libs, filetype=filetypes)
+
+        if "read_" not in function:
+            _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype=filetypes) + \
+                expand(path, function=function, prefix=prefix, iteration=iterations, size=pybedtool_sizes, library=smaller_libs, filetype=filetypes)
+        elif function == "read_gtf":
+            _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype="annotation")
+        elif function in ["read_bed"]:
+            _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype="reads")
 
         outfiles.extend(_outfiles)
 
     return outfiles
 
 
-single_pyranges_functions = ss[ss.Category == "single"].Function.drop_duplicates()
+single_pyranges_functions = ss[ss.Category == "unary"].Function.drop_duplicates()
 single_pyranges_files = _expand(single_pyranges_functions)
-
-# for f in single_pyranges_files:
-#     if "dataframe" in f and "pybedtools" in f:
-#         print(f)
+# print(single_pyranges_files)
+# raise
 
 binary_pyranges_functions = ss[ss.Category == "binary"].Function.drop_duplicates()
 binary_pyranges_files = _expand(binary_pyranges_functions)
@@ -141,14 +131,19 @@ rle_files = _expand(rle_functions)
 tree_functions = ss[ss.Category == "tree"].Function.drop_duplicates()
 tree_files = _expand(tree_functions)
 
-category_dict = {"single": single_pyranges_files,
+io_functions = ss[ss.Category == "io"].Function.drop_duplicates()
+io_files = _expand(io_functions)
+
+
+category_dict = {"unary": single_pyranges_files,
                  "binary": binary_pyranges_files,
                  "rle": rle_files,
-                 "tree": tree_files}
+                 "tree": tree_files,
+                 "io": io_files}
 
-
-# print(rle_map)
+# print(category_dict)
 # raise
+
 def correct_file(w):
 
     ft = w.filetype
@@ -173,7 +168,14 @@ for rule in glob.glob("rules/*.smk"):
 
 rule all:
     input:
-        expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict)
+        expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict),
+        expand("{prefix}/benchmark/graphs/memory_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict),
+        expand("{prefix}/benchmark/graphs/main_paper_time_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category="binary")
+
+rule supplementaries:
+    input:
+        expand("{prefix}/benchmark/supplementaries/{category}.pdf", prefix=prefix, category=category_dict)
+
 
 
 rule generate:
