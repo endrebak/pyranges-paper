@@ -12,7 +12,7 @@ print(tail(df))
 
 
 if (snakemake@params[["subset"]]){
-  ncol = 4
+  ncol = NULL
 } else {
   ncol = NULL
 }

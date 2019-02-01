@@ -38,7 +38,8 @@ rule graph_memory:
     output:
         "{prefix}/benchmark/graphs/memory_{filetype}_{category}.pdf"
     params:
-        title = lambda w: get_title(w).replace("Time", "Memory")
+        title = lambda w: get_title(w).replace("Time", "Memory"),
+        subset = False
     script:
         "../scripts/graph_memory.R"
 
@@ -53,13 +54,25 @@ rule subset_collected_timings:
 
 
 
-rule graph_time_subset:
+# rule graph_time_subset:
+#     input:
+#         "{prefix}/benchmark/main_paper_collected_timings_mean_{filetype}_{category}.txt"
+#     output:
+#         "{prefix}/benchmark/graphs/main_paper_time_{filetype}_{category}.pdf"
+#     params:
+#         title = get_title,
+#         subset = True
+#     script:
+#         "../scripts/graph_time.R"
+
+
+rule graph_paper:
     input:
         "{prefix}/benchmark/main_paper_collected_timings_mean_{filetype}_{category}.txt"
     output:
-        "{prefix}/benchmark/graphs/main_paper_time_{filetype}_{category}.pdf"
+        "{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.pdf"
     params:
         title = get_title,
         subset = True
     script:
-        "../scripts/graph_time.R"
+        "../scripts/graph_paper.R"

@@ -67,6 +67,8 @@ wildcard_constraints:
     rle_operation = regex(rle_ops),
     io_operation = regex(io_ops),
     libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
+    category = regex(ss.Category.drop_duplicates().tolist()),
+    num_cores = regex(num_cores),
 
 
 def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}_time.txt",
@@ -170,7 +172,9 @@ rule all:
     input:
         expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict),
         expand("{prefix}/benchmark/graphs/memory_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict),
-        expand("{prefix}/benchmark/graphs/main_paper_time_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category="binary")
+        expand("{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.pdf", measure="time memory".split(), prefix=prefix, filetype=filetypes, category="binary"),
+        expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary"),
+        # expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary")
 
 rule supplementaries:
     input:
