@@ -66,18 +66,24 @@ rule create_graph_mds:
         out_handle = open(output[0], "w+")
         out_handle.write("# Timing: PyRanges vs. R GenomicRanges vs. bedtools\n")
 
-        graph_dicts = defaultdict(list)
+        graph_dicts = defaultdict(dict)
         for f in input:
             fname = f.split("/")[-1]
             ftype, category = fname.replace(".png", "").split("_")[1:]
-            graph_dicts[category].append(fname)
 
             outf = "{}".format(fname)
             command = "cp {} supplementary_paper/{}".format(f, outf)
+            graph_dicts[category][ftype] = fname
 
-            img = '<img src="{}" />\n'.format(outf)
+        for category, d in graph_dicts.items():
 
-            out_handle.write(img)
+            out_handle.write("### {}\n".format(category))
+
+            for ftype in ["annotation", "reads"]:
+                out_handle.write("#### {}\n".format(ftype))
+                img = '<img src="{}" />\n'.format(d[ftype])
+
+                out_handle.write(img)
 
         out_handle.close()
 
