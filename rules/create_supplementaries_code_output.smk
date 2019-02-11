@@ -11,15 +11,15 @@ def supps(w):
                       filetypes="annotation",
                       num_cores=num_cores[:1])
 
-    print(results)
     return results
+
 
 
 rule create_test_md:
     input:
         results = supps
     output:
-        "{prefix}/benchmark/supplementaries/{category}.md"
+        "supplementary_paper/code_{category}.md"
     run:
         category = wildcards.category
         # result
@@ -35,6 +35,7 @@ rule create_test_md:
             result_dict[function][library] = "".join(open(f).readlines())
 
         outfile = open(output[0], "w+")
+
         for function, lib_dict in natsorted(code_dict.items()):
 
             outfile.write("# " + function + "\n\n")
@@ -51,6 +52,39 @@ rule create_test_md:
             outfile.write("\\newpage\n")
 
         outfile.close()
+
+
+rule create_graph_mds:
+    input:
+        (f for f in
+         expand("{prefix}/benchmark/graphs/{{measure}}_{filetype}_{category}.{extension}", prefix=prefix, filetype=filetypes, category=category_dict, extension=extensions)
+         if f.endswith(".png"))
+    output:
+        "supplementary_paper/{measure}.md"
+    run:
+
+        out_handle = open(output[0], "w+")
+        out_handle.write("# Timing: PyRanges vs. R GenomicRanges vs. bedtools\n")
+
+        graph_dicts = defaultdict(list)
+        for f in input:
+            fname = f.split("/")[-1]
+            ftype, category = fname.replace(".png", "").split("_")[1:]
+            graph_dicts[category].append(fname)
+
+            outf = "{}".format(fname)
+            command = "cp {} supplementary_paper/{}".format(f, outf)
+
+            img = '<img src="{}" />\n'.format(outf)
+
+            out_handle.write(img)
+
+        out_handle.close()
+
+
+# rule rmarkdown:
+#     input:
+
 
 
 rule md_to_pdf:

@@ -42,7 +42,7 @@ def regex(lst):
 sort = ["sorted"]
 num_cores = [1, 4, 8] # 2, 24, 48]
 
-filetypes = "reads annotation".split()
+filetypes = "annotation reads".split()
 
 small_run = False
 if small_run:
@@ -143,8 +143,6 @@ category_dict = {"unary": single_pyranges_files,
                  "tree": tree_files,
                  "io": io_files}
 
-# print(category_dict)
-# raise
 
 def correct_file(w):
 
@@ -155,6 +153,10 @@ def correct_file(w):
     else:
         return "{prefix}/data/download/annotation_{size}.gtf.gz".format(**w)
 
+extensions = "pdf png".split()
+time_files = expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.{extension}", prefix=prefix, filetype=filetypes, category=category_dict, extension=extensions)
+memory_files = expand("{prefix}/benchmark/graphs/memory_{filetype}_{category}.{extension}", prefix=prefix, filetype=filetypes, category=category_dict, extension=extensions)
+main_paper_graphs = expand("{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.{extension}", measure="time memory".split(), prefix=prefix, filetype=filetypes, category="binary", extension=extensions)
 
 for rule in glob.glob("rules/*.smk"):
     print("including: " + rule, file=sys.stderr)
@@ -168,13 +170,12 @@ for rule in glob.glob("rules/*.smk"):
     include: rule
 
 
+
 rule all:
     input:
-        expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict),
-        expand("{prefix}/benchmark/graphs/memory_{filetype}_{category}.pdf", prefix=prefix, filetype=filetypes, category=category_dict),
-        expand("{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.pdf", measure="time memory".split(), prefix=prefix, filetype=filetypes, category="binary"),
-        expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary"),
-        # expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary")
+        time_files, memory_files, main_paper_graphs
+        # expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary"),
+        # expand("{prefix}/benchmark/differences/{um_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary")
 
 rule supplementaries:
     input:

@@ -23,7 +23,7 @@ rule graph_time:
     input:
         "{prefix}/benchmark/collected_timings_mean_{filetype}_{category}.txt"
     output:
-        "{prefix}/benchmark/graphs/time_{filetype}_{category}.pdf"
+        "{prefix}/benchmark/graphs/time_{filetype}_{category}.{extension}"
     params:
         title = get_title,
         subset = False
@@ -36,7 +36,7 @@ rule graph_memory:
     input:
         "{prefix}/benchmark/collected_timings_mean_{filetype}_{category}.txt"
     output:
-        "{prefix}/benchmark/graphs/memory_{filetype}_{category}.pdf"
+        "{prefix}/benchmark/graphs/memory_{filetype}_{category}.{extension}"
     params:
         title = lambda w: get_title(w).replace("Time", "Memory"),
         subset = False
@@ -58,7 +58,7 @@ rule subset_collected_timings:
 #     input:
 #         "{prefix}/benchmark/main_paper_collected_timings_mean_{filetype}_{category}.txt"
 #     output:
-#         "{prefix}/benchmark/graphs/main_paper_time_{filetype}_{category}.pdf"
+#         "{prefix}/benchmark/graphs/main_paper_time_{filetype}_{category}.{extension}"
 #     params:
 #         title = get_title,
 #         subset = True
@@ -70,7 +70,7 @@ rule graph_paper:
     input:
         "{prefix}/benchmark/main_paper_collected_timings_mean_{filetype}_{category}.txt"
     output:
-        "{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.pdf"
+        "{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.{extension}"
     params:
         title = get_title,
         subset = True
