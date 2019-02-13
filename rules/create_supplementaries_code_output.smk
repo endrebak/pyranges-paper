@@ -73,6 +73,8 @@ rule create_graph_mds:
 
             outf = "{}".format(fname)
             command = "cp {} supplementary_paper/{}".format(f, outf)
+            print(command)
+            shell(command)
             graph_dicts[category][ftype] = fname
 
         for category, d in graph_dicts.items():
