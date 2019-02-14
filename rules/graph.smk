@@ -4,19 +4,19 @@ titles = {"tree": "bx-python vs. PyRanges NCLS",
           "unary": "BioConductor GenomicRanges vs. pybedtools vs. PyRanges",
           "binary": "BioConductor GenomicRanges vs. pybedtools vs. PyRanges"}
 
-method_names = {"tree": ", Tree Methods: ",
-                "rle": ", RLE Methods: ",
-                "io": ", IO Methods: ",
-                "unary": ", Unary Methods: ",
-                "binary": ", Binary Methods: "}
+method_names = {"tree": "Tree Methods",
+                "rle": "RLE Methods",
+                "io": "IO Methods",
+                "unary": "Unary Methods",
+                "binary": "Binary Methods"}
 
 
 def get_title(w):
 
     c = w.category
-    f = " (Filetype" + w.filetype + ")"
+    f = " (" + w.filetype.capitalize() + ")"
 
-    return "Time Usage" + method_names[c] + f
+    return "Time Usage " + method_names[c] + f
 
 
 rule graph_time:

@@ -24,6 +24,8 @@ minutes_seconds = total_dt.strftime('%-M.%-S.%f')
 
 open(snakemake.output.time, "w+").write(minutes_seconds)
 
+# result.df.to_csv("test.csv", sep="\t", index=False, header=True)
+
 result_string = str(result)
 
 open(snakemake.output.result, "w+").write(result_string)
