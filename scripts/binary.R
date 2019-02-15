@@ -4,6 +4,8 @@ library(GenomicRanges)
 
 code = snakemake@params[["code"]]
 
+filetype = snakemake@wildcards[["filetype"]]
+
 print("code")
 print(code)
 
@@ -12,7 +14,7 @@ fb = snakemake@input[["background"]]
 
 gr1 = file_to_grange(fc)
 ## print(gr1)
-gr2 = file_to_grange(fb, filetype=snakemake@wildcards[["filetype"]])
+gr2 = file_to_grange(fb, filetype)
 
 start.time <- Sys.time()
 eval(parse(text=code))

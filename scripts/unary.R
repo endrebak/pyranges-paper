@@ -1,13 +1,14 @@
 source("scripts/helpers.R")
 
 operation = snakemake@params[["operation"]]
+filetype = snakemake@wildcards[["filetype"]]
 operation = paste0("f <- function(gr){\n", operation, "\nreturn(result)}")
 print(paste0("Performing operation ", operation, " for ", snakemake@wildcards[["unary_operation"]]))
 
 fc = snakemake@input[[1]]
 
 if (snakemake@wildcards[["unary_operation"]] != "dataframe_to_genomicrange"){
-  gr = file_to_grange(fc)
+  gr = file_to_grange(fc, filetype)
 } else {
   df = get_df(fc)
 }

@@ -5,20 +5,6 @@ library(gridExtra)
 df = read.table(snakemake@input[[1]], header=1, stringsAsFactors=FALSE)
 print(head(df))
 
-## # https://stackoverflow.com/a/28594060/992687
-## grid_arrange_shared_legend <- function(...) {
-##   plots <- list(...)
-##   g <- ggplotGrob(plots[[1]] + theme(legend.position="bottom"))$grobs
-##   legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
-##   lheight <- sum(legend$height)
-##   grid.arrange(
-##     do.call(arrangeGrob, lapply(plots, function(x)
-##       x + theme(legend.position="none"))),
-##     legend,
-##     ncol = 1,
-##     heights = unit.c(unit(1, "npc") - lheight, lheight))
-## }
-
 f = ggplot(df, aes(x=Log10NBIntervals, y=Seconds)) + geom_line(aes(colour=Library)) + facet_wrap(~Function) + geom_errorbar(aes(x=Log10NBIntervals, ymin=Seconds - SecondsSD, ymax=Seconds + SecondsSD, width=0.05)) + xlab("") + ylab("Running time in log10 seconds.") + theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1)) + ggtitle("Time usage")
                                         # theme(legend.position="none")
 f$layout$l[f$layout$name == "title"] <- 0

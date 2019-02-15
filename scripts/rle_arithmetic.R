@@ -6,17 +6,23 @@ operation = paste0("f <- function(c1p, c2p, c1m, c2m){\n", operation, "\nreturn(
 eval(parse(text=operation))
 print(operation)
 
+filetype = snakemake@wildcards[["filetype"]]
 
 fc = snakemake@input[["chip"]]
 fb = snakemake@input[["background"]]
 
-c1p = file_to_coverage(fc, "+")
-c1m = file_to_coverage(fc, "-")
-c2p = file_to_coverage(fb, "+")
-c2m = file_to_coverage(fb, "-")
+c = file_to_grange(fc)
+b = file_to_grange(fb, filetype)
+
+cp = coverage(c[strand(c) == "+"])
+cm = coverage(c[strand(c) == "-"])
+
+bp = coverage(b[strand(b) == "+"])
+bm = coverage(b[strand(b) == "-"])
+
 
 start.time <- Sys.time()
-result = f(c1p, c2p, c1m, c2m)
+result = f(cp, bp, cm, bm)
 end.time <- Sys.time()
 
 time.taken <- end.time - start.time

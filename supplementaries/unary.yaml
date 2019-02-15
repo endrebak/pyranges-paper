@@ -1,6 +1,6 @@
 bioconductor:
   dataframe_to_genomicrange:
-    result = GRanges(seqnames = df$Chromosome, ranges = IRanges(start = df$Start, end = df$End), strand = df$Strand)
+    result = makeGRangesFromDataFrame(df, keep.extra.columns=TRUE, ignore.strand=FALSE, seqinfo=NULL, seqnames.field=c("Chromosome"), start.field="Start", end.field=c("End"), strand.field="Strand")
   cluster: |
     result = reduce(gr)
   sort: |

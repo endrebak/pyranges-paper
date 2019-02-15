@@ -76,3 +76,39 @@ rule graph_paper:
         subset = True
     script:
         "../scripts/graph_paper.R"
+
+
+rule collect_filetype_split_function:
+    input:
+        lambda w: expand("{{prefix}}/benchmark/collected_timings_mean_{filetype}_{category}.txt", filetype=filetypes, category=ss[ss.Function == w.function].Category)
+    output:
+        "{prefix}/benchmark/collected_timings_mean_{function}.txt"
+    run:
+        dfs = []
+        for f in input:
+            filetype = f.split("/")[-1].split("_")[-2]
+            df = pd.read_csv(f, sep="\t")
+            df.insert(df.shape[1], "Filetype", filetype)
+            dfs.append(df)
+
+        df = pd.concat(dfs)
+        df[df.Function == wildcards.function].to_csv(output[0], sep="\t")
+
+
+def fix_description(desc):
+    from textwrap import wrap
+    assert len(desc) < 160, "Description too long (>= 160 chars.)"
+    return "\n".join(wrap(desc, width=80)) + "\n"
+
+descriptions = {"cluster": "Order intervals by position and merge those overlapping."}
+
+rule graph_time_memory_together:
+    input:
+        "{prefix}/benchmark/collected_timings_mean_{function}.txt"
+    output:
+        "{prefix}/benchmark/graphs/time_memory_together_{function}.{extension}"
+    params:
+        function = lambda w: w.function.capitalize(),
+        description = lambda w: fix_description(descriptions[w.function])
+    script:
+        "../scripts/graph_time_mem_together.R"

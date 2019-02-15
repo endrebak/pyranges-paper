@@ -69,6 +69,7 @@ wildcard_constraints:
     libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
     category = regex(ss.Category.drop_duplicates().tolist()),
     num_cores = regex(num_cores),
+    function = regex(ss.Function.drop_duplicates())
 
 
 def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}_time.txt",
@@ -157,6 +158,7 @@ extensions = "pdf png".split()
 time_files = expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.{extension}", prefix=prefix, filetype=filetypes, category=category_dict, extension=extensions)
 memory_files = expand("{prefix}/benchmark/graphs/memory_{filetype}_{category}.{extension}", prefix=prefix, filetype=filetypes, category=category_dict, extension=extensions)
 main_paper_graphs = expand("{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.{extension}", measure="time memory".split(), prefix=prefix, filetype=filetypes, category="binary", extension=extensions)
+time_mem_together_graphs = expand("{prefix}/benchmark/graphs/time_memory_together_{function}.{extension}", measure="time memory".split(), prefix=prefix, filetype=filetypes, function=ss.Function.drop_duplicates(), extension="png")
 
 for rule in glob.glob("rules/*.smk"):
     print("including: " + rule, file=sys.stderr)
@@ -173,13 +175,18 @@ for rule in glob.glob("rules/*.smk"):
 
 rule all:
     input:
-        time_files, memory_files, main_paper_graphs
+        time_files, memory_files, main_paper_graphs, time_mem_together_graphs
         # expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary"),
         # expand("{prefix}/benchmark/differences/{um_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary")
 
-rule supplementaries:
+rule supplementary_code:
     input:
         expand("{prefix}/benchmark/supplementaries/{category}.pdf", prefix=prefix, category=category_dict)
+
+
+rule supplementary_graphs:
+    input:
+        expand("supplementary_paper/{measure}.md", measure="time memory".split())
 
 
 

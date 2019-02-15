@@ -7,6 +7,8 @@ unary cluster bioconductor 0
 unary cluster pybedtools 0
 unary genomicrange_to_coverage pyranges 1
 unary genomicrange_to_coverage bioconductor 0
+# unary dataframe_to_genomicrange pyranges 0
+# unary dataframe_to_genomicrange bioconductor 0
 binary overlap pyranges 1
 binary overlap bioconductor 0
 binary overlap pybedtools 0
@@ -47,8 +49,8 @@ rle rle_subtract pyranges 1
 rle rle_multiply bioconductor 0
 rle rle_multiply pyranges 1
 io read_bed pyranges 0
-io read_bam pyranges 0
+# io read_bam pyranges 0
 io read_gtf pyranges 0
 io read_bed bioconductor 0
-io read_bam bioconductor 0
+# io read_bam bioconductor 0
 io read_gtf bioconductor 0
