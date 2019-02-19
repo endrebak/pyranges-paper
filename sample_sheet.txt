@@ -1,56 +1,56 @@
-Category Function Library Multicore
-unary sort pyranges 1
-unary sort bioconductor 0
-unary sort pybedtools 0
-unary cluster pyranges 1
-unary cluster bioconductor 0
-unary cluster pybedtools 0
-unary genomicrange_to_coverage pyranges 1
-unary genomicrange_to_coverage bioconductor 0
-# unary dataframe_to_genomicrange pyranges 0
-# unary dataframe_to_genomicrange bioconductor 0
-binary overlap pyranges 1
-binary overlap bioconductor 0
-binary overlap pybedtools 0
-binary intersect pyranges 1
-binary intersect bioconductor 0
-binary intersect pybedtools 0
-binary nearest pyranges 1
-binary nearest bioconductor 0
-binary nearest pybedtools 0
-binary nearest_nonoverlapping pyranges 1
-binary nearest_nonoverlapping pybedtools 0
-binary subtract pyranges 1
-binary subtract bioconductor 0
-binary subtract pybedtools 0
-binary set_intersect pyranges 1
-binary set_intersect bioconductor 0
-binary set_intersect pybedtools 0
-binary set_union pyranges 1
-binary set_union bioconductor 0
-binary set_union pybedtools 0
-binary jaccard pyranges 1
-binary jaccard pybedtools 0
-binary join pyranges 1
-binary join pybedtools 0
-binary join bioconductor 0
-tree tree_build ncls 0
-tree tree_build bx-python 0
-# tree tree_build pandas 0
-tree tree_overlap ncls 0
-tree tree_overlap bx-python 0
-# tree tree_overlap pandas 0
-rle rle_divide bioconductor 0
-rle rle_divide pyranges 1
-rle rle_add bioconductor 0
-rle rle_add pyranges 1
-rle rle_subtract bioconductor 0
-rle rle_subtract pyranges 1
-rle rle_multiply bioconductor 0
-rle rle_multiply pyranges 1
-io read_bed pyranges 0
-# io read_bam pyranges 0
-io read_gtf pyranges 0
-io read_bed bioconductor 0
-# io read_bam bioconductor 0
-io read_gtf bioconductor 0
+Category	Function	Library	Multicore
+unary	sort	pyranges	1
+unary	sort	bioconductor	0
+unary	sort	pybedtools	0
+unary	cluster	pyranges	1
+unary	cluster	bioconductor	0
+unary	cluster	pybedtools	0
+unary	genomicrange_to_coverage	pyranges	1
+unary	genomicrange_to_coverage	bioconductor	0
+#	unary	dataframe_to_genomicrange	pyranges	0
+#	unary	dataframe_to_genomicrange	bioconductor	0
+binary	overlap	pyranges	1
+binary	overlap	bioconductor	0
+binary	overlap	pybedtools	0
+binary	intersect	pyranges	1
+binary	intersect	bioconductor	0
+binary	intersect	pybedtools	0
+binary	nearest	pyranges	1
+binary	nearest	bioconductor	0
+binary	nearest	pybedtools	0
+binary	nearest_nonoverlapping	pyranges	1
+binary	nearest_nonoverlapping	pybedtools	0
+binary	subtract	pyranges	1
+binary	subtract	bioconductor	0
+binary	subtract	pybedtools	0
+binary	set_intersect	pyranges	1
+binary	set_intersect	bioconductor	0
+binary	set_intersect	pybedtools	0
+binary	set_union	pyranges	1
+binary	set_union	bioconductor	0
+binary	set_union	pybedtools	0
+binary	jaccard	pyranges	1
+binary	jaccard	pybedtools	0
+binary	join	pyranges	1
+binary	join	pybedtools	0
+binary	join	bioconductor	0
+tree	tree_build	ncls	0
+tree	tree_build	bx-python	0
+#	tree	tree_build	pandas	0
+tree	tree_overlap	ncls	0
+tree	tree_overlap	bx-python	0
+#	tree	tree_overlap	pandas	0
+rle	rle_divide	bioconductor	0
+rle	rle_divide	pyranges	1
+rle	rle_add	bioconductor	0
+rle	rle_add	pyranges	1
+rle	rle_subtract	bioconductor	0
+rle	rle_subtract	pyranges	1
+rle	rle_multiply	bioconductor	0
+rle	rle_multiply	pyranges	1
+io	read_bed	pyranges	0
+#	io	read_bam	pyranges	0
+io	read_gtf	pyranges	0
+io	read_bed	bioconductor	0
+#	io	read_bam	bioconductor	0
+io	read_gtf	bioconductor	0

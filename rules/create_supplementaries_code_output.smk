@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from collections import defaultdict
 from natsort import natsorted
 
@@ -90,8 +91,72 @@ rule create_graph_mds:
         out_handle.close()
 
 
-# rule rmarkdown:
-#     input:
+def supps_all(w):
+
+    rows = ss[ss.Function == w.function]
+    print(rows)
+    libraries = set(rows.Library)
+    print(libraries)
+    libraries = [l.replace("pyranges", "pyranges_1") for l in libraries]
+
+    if w.function == "read_bed":
+        filetype = "reads"
+    else:
+        filetype = "annotation"
+
+
+    results = expand("{prefix}/benchmark/{function}/{library}/{filetype}/0_100000.result",
+                     prefix = prefix,
+                     filetype = filetype,
+                     function = w.function,
+                     library=libraries,
+                     iterations=iterations[:1],
+                     sizes=sizes[:1],
+                     filetypes="annotation",
+                     num_cores=num_cores[:1])
+
+    return results
+
+
+rule create_all_mds:
+    input:
+        graph = prefix + "/benchmark/graphs/time_memory_together_{function}.png",
+        result = supps_all
+    output:
+        "supplementary_paper/{function}_all.md"
+    run:
+        category = ss[ss.Function == wildcards.function].Category.iloc[0]
+        function = wildcards.function
+
+        libraries = ss[ss.Function == function].Library.drop_duplicates().tolist()
+
+        result_handle = open(output[0], "w+")
+
+        result_handle.write("# " + function.capitalize() + "\n\n")
+
+        img = '<img src="{}" />\n\n'.format(input.graph.split("/")[-1])
+        result_handle.write(img)
+
+        result_handle.write("## Code\n\n")
+        for library in libraries:
+            result_handle.write("#### " + library + "\n\n")
+            result_handle.write(category_code[category][library][function] + "\n\n")
+
+
+        result_handle.write("## Results\n\n")
+        for library in libraries:
+            result_handle.write("#### " + library + "\n\n")
+            f = [f for f in input.result if library.replace("pyranges", "pyranges_1") in f][0]
+            source = open(f).readlines()
+            result = "".join(source)
+            result_handle.write(result + "\n\n")
+
+        result_handle.close()
+
+
+
+
+
 
 
 

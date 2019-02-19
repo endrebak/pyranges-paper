@@ -54,17 +54,6 @@ rule subset_collected_timings:
 
 
 
-# rule graph_time_subset:
-#     input:
-#         "{prefix}/benchmark/main_paper_collected_timings_mean_{filetype}_{category}.txt"
-#     output:
-#         "{prefix}/benchmark/graphs/main_paper_time_{filetype}_{category}.{extension}"
-#     params:
-#         title = get_title,
-#         subset = True
-#     script:
-#         "../scripts/graph_time.R"
-
 
 rule graph_paper:
     input:
@@ -96,11 +85,13 @@ rule collect_filetype_split_function:
 
 
 def fix_description(desc):
+
     from textwrap import wrap
     assert len(desc) < 160, "Description too long (>= 160 chars.)"
     return "\n".join(wrap(desc, width=80)) + "\n"
 
-descriptions = {"cluster": "Order intervals by position and merge those overlapping."}
+descriptions = pd.read_csv("supplementaries/descriptions.yaml", sep="\t", header=0)
+print(descriptions)
 
 rule graph_time_memory_together:
     input:
@@ -109,6 +100,6 @@ rule graph_time_memory_together:
         "{prefix}/benchmark/graphs/time_memory_together_{function}.{extension}"
     params:
         function = lambda w: w.function.capitalize(),
-        description = lambda w: fix_description(descriptions[w.function])
+        description = lambda w: fix_description(descriptions[descriptions.Function == w.function].Description.iloc[0])
     script:
         "../scripts/graph_time_mem_together.R"

@@ -1,0 +1,21 @@
+Function	Description
+cluster	Order intervals by position and merge those overlapping.
+genomicrange_to_coverage	Turn ranges into run length encodings.
+intersect	Find overlapping intervals in both datasets.
+jaccard	Find similarity between sets based on intersections.
+join	Find the overlapping intervals and combine their data.
+nearest	Find the intervals in B closest to those in A.
+nearest_nonoverlapping	Find the non-overlapping intervals in B closest to those in A.
+overlap	Find the intervals in A overlapping at least one of the intervals in B.
+read_bed	Read a bed file into a GenomicRanges object.
+read_gtf	Read a gtf file into a GenomicRanges object.
+rle_add	Add two Rle objects.
+rle_divide	Divide one Rle object by another.
+rle_multiply	Multiply two Rle objects.
+rle_subtract	Subtract one Rle object from another.
+set_intersect	Intersect the set union of the ranges.
+set_union	Concatenate the datasets and cluster them afterwards.
+sort	Sort the intervals on Start and End.
+subtract	Remove all intervals in B from those in A.
+tree_build	Create a tree from a collection of intervals.
+tree_overlap	Search in a tree using a collection of intervals.

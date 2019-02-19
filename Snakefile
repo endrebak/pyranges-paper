@@ -12,7 +12,7 @@ from pyrle import PyRles
 
 from os import environ
 
-ss = pd.read_csv("sample_sheet.txt", sep=" ", header=0, comment="#")
+ss = pd.read_csv("sample_sheet.txt", sep="\t", header=0, comment="#")
 
 binary_map = yaml.load(open("supplementaries/binary.yaml"))
 rle_map = yaml.load(open("supplementaries/rle.yaml"))
@@ -69,7 +69,8 @@ wildcard_constraints:
     libraries = regex(libraries + ["ncls", "bx-python", "pybedtools"]),
     category = regex(ss.Category.drop_duplicates().tolist()),
     num_cores = regex(num_cores),
-    function = regex(ss.Function.drop_duplicates())
+    function = regex(ss.Function.drop_duplicates()),
+    measure = "(time|memory)"
 
 
 def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}_time.txt",
@@ -160,6 +161,8 @@ memory_files = expand("{prefix}/benchmark/graphs/memory_{filetype}_{category}.{e
 main_paper_graphs = expand("{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.{extension}", measure="time memory".split(), prefix=prefix, filetype=filetypes, category="binary", extension=extensions)
 time_mem_together_graphs = expand("{prefix}/benchmark/graphs/time_memory_together_{function}.{extension}", measure="time memory".split(), prefix=prefix, filetype=filetypes, function=ss.Function.drop_duplicates(), extension="png")
 
+all_mds = expand("supplementary_paper/{function}_all.md", function=ss.Function.drop_duplicates())
+
 for rule in glob.glob("rules/*.smk"):
     print("including: " + rule, file=sys.stderr)
 
@@ -175,7 +178,7 @@ for rule in glob.glob("rules/*.smk"):
 
 rule all:
     input:
-        time_files, memory_files, main_paper_graphs, time_mem_together_graphs
+        time_files, memory_files, main_paper_graphs, time_mem_together_graphs, all_mds
         # expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary"),
         # expand("{prefix}/benchmark/differences/{um_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary")
 

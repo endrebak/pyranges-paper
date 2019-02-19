@@ -67,7 +67,7 @@ pybedtools:
     catted = sc.cat(sb, s=True, c=[4, 5, 6], o="first").sort()
     result = catted.merge(s=True, c=[4, 5, 6], o="first")
   join:
-    result = pb2.intersect(pb1, wao=True)
+    result = pb2.intersect(pb1, wao=True, s=True)
   subtract:
     result = pb2.subtract(pb1, s=True)
   jaccard:
