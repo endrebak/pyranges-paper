@@ -179,8 +179,6 @@ for rule in glob.glob("rules/*.smk"):
 rule all:
     input:
         time_files, memory_files, main_paper_graphs, time_mem_together_graphs, all_mds
-        # expand("{prefix}/benchmark/differences/{num_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary"),
-        # expand("{prefix}/benchmark/differences/{um_cores}_{category}_mean_differences.txt", num_cores=[1, 8], prefix=prefix, category="binary")
 
 rule supplementary_code:
     input:
