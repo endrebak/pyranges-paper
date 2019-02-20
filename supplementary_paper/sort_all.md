@@ -6,22 +6,29 @@
 
 #### pyranges
 
+```
 result = gr.sort()
+```
 
 #### bioconductor
 
+```
 result = sortSeqlevels(gr)
 result = sort(result)
 
+```
 
 #### pybedtools
 
+```
 result = pb1.sort()
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+
 | Chromosome   | Start     | End       | Strand   |
 | (int8)       | (int32)   | (int32)   | (int8)   |
@@ -35,9 +42,11 @@ result = pb1.sort()
 | chrY         | 57212183  | 57213125  | -        |
 +--------------+-----------+-----------+----------+
 PyRanges object has 100000 sequences from 25 chromosomes.
+```
 
 #### bioconductor
 
+```
 GRanges object with 100000 ranges and 20 metadata columns:
            seqnames        ranges strand |   source       type     score
               <Rle>     <IRanges>  <Rle> | <factor>   <factor> <numeric>
@@ -120,9 +129,11 @@ GRanges object with 100000 ranges and 20 metadata columns:
   -------
   seqinfo: 25 sequences from an unspecified genome; no seqlengths
 
+```
 
 #### pybedtools
 
+```
 chr1	ENSEMBL	gene	17369	17436	.	-	.	gene_id "ENSG00000278267.1"; gene_type "miRNA"; gene_name "MIR6859-1"; level 3;
 chr1	HAVANA	exon	65419	65433	.	+	.	gene_id "ENSG00000186092.6"; transcript_id "ENST00000641515.2"; gene_type "protein_coding"; gene_name "OR4F5"; transcript_type "protein_coding"; transcript_name "OR4F5-202"; exon_number 1; exon_id "ENSE00003812156.1"; level 2; protein_id "ENSP00000493376.2"; tag "RNA_Seq_supported_partial"; tag "basic"; havana_gene "OTTHUMG00000001094.4"; havana_transcript "OTTHUMT00000003223.4";
 chr1	HAVANA	transcript	89551	91105	.	-	.	gene_id "ENSG00000239945.1"; transcript_id "ENST00000495576.1"; gene_type "lincRNA"; gene_name "AL627309.3"; transcript_type "lincRNA"; transcript_name "AL627309.3-201"; level 2; transcript_support_level "5"; tag "basic"; havana_gene "OTTHUMG00000001097.2"; havana_transcript "OTTHUMT00000003226.2";
@@ -135,4 +146,5 @@ chr1	HAVANA	transcript	498281	499175	.	-	.	gene_id "ENSG00000237094.12"; transcr
 chr1	HAVANA	exon	504980	505103	.	-	.	gene_id "ENSG00000237094.12"; transcript_id "ENST00000641303.1"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "AL732372.2"; transcript_type "processed_transcript"; transcript_name "AL732372.2-222"; exon_number 3; exon_id "ENSE00003812904.1"; level 2; havana_gene "OTTHUMG00000002857.7"; havana_transcript "OTTHUMT00000493601.1";
 Number of lines: 100000
 
+```
 

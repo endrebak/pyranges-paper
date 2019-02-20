@@ -6,17 +6,22 @@
 
 #### bioconductor
 
+```
 result = c(c1p / c2p, c1m / c2m)
 
+```
 
 #### pyranges
 
+```
 result = c1 / c2
+```
 
 ## Results
 
 #### bioconductor
 
+```
 RleList of length 50
 $chr1
 numeric-Rle of length 248928482 with 13826 runs
@@ -46,9 +51,11 @@ numeric-Rle of length 181320878 with 9053 runs
 ...
 <45 more elements>
 
+```
 
 #### pyranges
 
+```
 chr1 +
 +--------+---------+------+---------+-------+---------+---------+-------+---------+---------+--------+-------+
 | Runs   | 65419   | 14   | 18697   | 100   | 86710   |  ...    | 100   | 38646   | 13750   | 8436   | 100   |
@@ -65,4 +72,5 @@ chrY -
 +--------+---------+-------+---------+-------+---------+---------+-------+---------+-------+---------+-------+
 Rle of length 57213125 containing 1986 elements
 PyRles object with 50 chromosomes/strand pairs.
+```
 

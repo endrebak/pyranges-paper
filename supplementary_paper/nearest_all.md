@@ -6,10 +6,13 @@
 
 #### pyranges
 
+```
 result = gr.nearest(gr2, strandedness="same")
+```
 
 #### bioconductor
 
+```
 result = distanceToNearest(gr2, gr1, ignore.strand = FALSE, select="arbitrary")
 subject = as.data.frame(gr1[subjectHits(result)])
 colnames(subject) = paste0(colnames(subject), "_b")
@@ -20,15 +23,19 @@ df = merge(df, mcols(result)$distance, by=0)
 df = df[, -1]
 result = makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
 
+```
 
 #### pybedtools
 
+```
 result = pb2.sort().closest(pb1.sort(), s=True, t="first", d=True)
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+-----------+-----------+------------+------------+-------------+----------------+--------------+-------------+------------+
 | Chromosome   | Start     | End       | Strand   | Start_b   | End_b     | Strand_b   | Feature    | GeneID      | TranscriptID   | ExonNumber   | ExonID      | Distance   |
 | (int8)       | (int32)   | (int32)   | (int8)   | (int32)   | (int32)   | (int8)     | (object)   | (float64)   | (float64)      | (int16)      | (float64)   | (int64)    |
@@ -42,9 +49,11 @@ result = pb2.sort().closest(pb1.sort(), s=True, t="first", d=True)
 | chrY         | 57185390  | 57185490  | -        | 57171889  | 57172769  | -          | exon       | 223484.0    | 421233.0       | 1            | 1611457.0   | 12622      |
 +--------------+-----------+-----------+----------+-----------+-----------+------------+------------+-------------+----------------+--------------+-------------+------------+
 PyRanges object has 100000 sequences from 24 chromosomes.
+```
 
 #### bioconductor
 
+```
 GRanges object with 99994 ranges and 26 metadata columns:
           seqnames              ranges strand | seqnames_b   start_b     end_b
              <Rle>           <IRanges>  <Rle> |   <factor> <integer> <integer>
@@ -140,9 +149,11 @@ GRanges object with 99994 ranges and 26 metadata columns:
   -------
   seqinfo: 25 sequences from an unspecified genome; no seqlengths
 
+```
 
 #### pybedtools
 
+```
 chr1	ENSEMBL	gene	17369	17436	.	-	.	gene_id "ENSG00000278267.1"; gene_type "miRNA"; gene_name "MIR6859-1"; level 3;	chr1	48326	48426	10243	100	-	30891
 chr1	HAVANA	exon	65419	65433	.	+	.	gene_id "ENSG00000186092.6"; transcript_id "ENST00000641515.2"; gene_type "protein_coding"; gene_name "OR4F5"; transcript_type "protein_coding"; transcript_name "OR4F5-202"; exon_number 1; exon_id "ENSE00003812156.1"; level 2; protein_id "ENSP00000493376.2"; tag "RNA_Seq_supported_partial"; tag "basic"; havana_gene "OTTHUMG00000001094.4"; havana_transcript "OTTHUMT00000003223.4";	chr1	84130	84230	95640	100	+	18698
 chr1	HAVANA	transcript	89551	91105	.	-	.	gene_id "ENSG00000239945.1"; transcript_id "ENST00000495576.1"; gene_type "lincRNA"; gene_name "AL627309.3"; transcript_type "lincRNA"; transcript_name "AL627309.3-201"; level 2; transcript_support_level "5"; tag "basic"; havana_gene "OTTHUMG00000001097.2"; havana_transcript "OTTHUMT00000003226.2";	chr1	99516	99616	60846	100	-	8412
@@ -155,4 +166,5 @@ chr1	HAVANA	transcript	498281	499175	.	-	.	gene_id "ENSG00000237094.12"; transcr
 chr1	HAVANA	exon	504980	505103	.	-	.	gene_id "ENSG00000237094.12"; transcript_id "ENST00000641303.1"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "AL732372.2"; transcript_type "processed_transcript"; transcript_name "AL732372.2-222"; exon_number 3; exon_id "ENSE00003812904.1"; level 2; havana_gene "OTTHUMG00000002857.7"; havana_transcript "OTTHUMT00000493601.1";	chr1	514639	514739	24849	100	-	9537
 Number of lines: 100000
 
+```
 

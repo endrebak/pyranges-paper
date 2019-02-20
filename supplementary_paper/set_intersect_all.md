@@ -6,16 +6,21 @@
 
 #### pyranges
 
+```
 result = gr2.set_intersect(gr, strandedness="same")
 
+```
 
 #### bioconductor
 
+```
 result = intersect(gr2, gr1)
 
+```
 
 #### pybedtools
 
+```
 # the first flag is needed to keep the sixth columns
 sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
 
@@ -27,11 +32,13 @@ elif extension == "bed":
 sb = pb2.sort().merge(s=True, c=cols_to_keep, o="first")
 result = sc.intersect(sb, s=True)
 
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+
 | Chromosome   | Start     | End       | Strand   |
 | (int8)       | (int32)   | (int32)   | (int8)   |
@@ -45,9 +52,11 @@ result = sc.intersect(sb, s=True)
 | chrY         | 26350175  | 26350275  | -        |
 +--------------+-----------+-----------+----------+
 PyRanges object has 4915 sequences from 24 chromosomes.
+```
 
 #### bioconductor
 
+```
 GRanges object with 4916 ranges and 0 metadata columns:
          seqnames            ranges strand
             <Rle>         <IRanges>  <Rle>
@@ -65,9 +74,11 @@ GRanges object with 4916 ranges and 0 metadata columns:
   -------
   seqinfo: 25 sequences from an unspecified genome; no seqlengths
 
+```
 
 #### pybedtools
 
+```
 chr1	377483	377583	57003	100	-
 chr1	407494	407594	84512	100	-
 chr1	409556	409656	7163	100	-
@@ -80,4 +91,5 @@ chr1	1703218	1703318	74975	100	-
 chr1	1740047	1740147	97193	100	-
 Number of lines: 4915
 
+```
 

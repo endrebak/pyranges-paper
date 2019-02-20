@@ -6,19 +6,24 @@
 
 #### pyranges
 
+```
 result = gr.coverage(strand="same")
+```
 
 #### bioconductor
 
+```
 plus = coverage(gr[gr@strand == "+"])
 minus = coverage(gr[gr@strand == "-"])
 result = c(plus, minus)
 
+```
 
 ## Results
 
 #### pyranges
 
+```
 chr1 +
 +--------+---------+------+----------+--------+---------+---------+--------+-----+---------+---------+--------+
 | Runs   | 65418   | 15   | 522195   | 7140   | 36305   |  ...    | 1612   | 3   | 58918   | 12165   | 1586   |
@@ -35,9 +40,11 @@ chrY -
 +--------+----------+--------+--------+------+----------+---------+---------+------------+-------+---------+-------+
 Rle of length 57213125 containing 246 elements
 PyRles object with 50 chromosomes/strand pairs.
+```
 
 #### bioconductor
 
+```
 RleList of length 50
 $chr1
 integer-Rle of length 248919946 with 8089 runs
@@ -67,4 +74,5 @@ integer-Rle of length 114323845 with 1388 runs
 ...
 <45 more elements>
 
+```
 

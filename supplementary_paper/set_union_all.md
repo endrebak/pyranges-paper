@@ -6,16 +6,21 @@
 
 #### pyranges
 
+```
 result = gr2.set_union(gr, strandedness="same")
 
+```
 
 #### bioconductor
 
+```
 result = union(gr1, gr2)
 
+```
 
 #### pybedtools
 
+```
 # the first flag is needed to keep the sixth columns
 sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
 
@@ -28,11 +33,13 @@ sb = pb2.sort().merge(s=True, c=cols_to_keep, o="first")
 catted = sc.cat(sb, s=True, c=[4, 5, 6], o="first").sort()
 result = catted.merge(s=True, c=[4, 5, 6], o="first")
 
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+
 | Chromosome   | Start     | End       | Strand   |
 | (int8)       | (int32)   | (int32)   | (int8)   |
@@ -46,9 +53,11 @@ result = catted.merge(s=True, c=[4, 5, 6], o="first")
 | chrY         | 57212183  | 57213125  | -        |
 +--------------+-----------+-----------+----------+
 PyRanges object has 155261 sequences from 25 chromosomes.
+```
 
 #### bioconductor
 
+```
 GRanges object with 155253 ranges and 0 metadata columns:
            seqnames        ranges strand
               <Rle>     <IRanges>  <Rle>
@@ -66,9 +75,11 @@ GRanges object with 155253 ranges and 0 metadata columns:
   -------
   seqinfo: 25 sequences from an unspecified genome; no seqlengths
 
+```
 
 #### pybedtools
 
+```
 chr1	17368	17436	17369	17436	-
 chr1	48326	48426	10243	100	-
 chr1	52843	52943	73789	100	-
@@ -81,4 +92,5 @@ chr1	139968	140068	32513	100	-
 chr1	170940	171040	83728	100	+
 Number of lines: 155261
 
+```
 

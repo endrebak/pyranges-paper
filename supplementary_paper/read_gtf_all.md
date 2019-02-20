@@ -6,18 +6,23 @@
 
 #### pyranges
 
+```
 result = pr.read_gtf(f, annotation="ensembl")
 
+```
 
 #### bioconductor
 
+```
 result = import(file)
 
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+------------+-------------+----------------+--------------+-------------+
 | Chromosome   | Start     | End       | Strand   | Feature    | GeneID      | TranscriptID   | ExonNumber   | ExonID      |
 | (int8)       | (int32)   | (int32)   | (int8)   | (object)   | (float64)   | (float64)      | (int16)      | (float64)   |
@@ -31,9 +36,11 @@ result = import(file)
 | chrY         | 7701186   | 7701247   | -        | exon       | 225520.0    | 437686.0       | 1            | 1723990.0   |
 +--------------+-----------+-----------+----------+------------+-------------+----------------+--------------+-------------+
 PyRanges object has 100000 sequences from 25 chromosomes.
+```
 
 #### bioconductor
 
+```
 GRanges object with 100000 ranges and 20 metadata columns:
            seqnames              ranges strand |   source       type     score
               <Rle>           <IRanges>  <Rle> | <factor>   <factor> <numeric>
@@ -116,4 +123,5 @@ GRanges object with 100000 ranges and 20 metadata columns:
   -------
   seqinfo: 25 sequences from an unspecified genome; no seqlengths
 
+```
 

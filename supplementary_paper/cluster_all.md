@@ -6,15 +6,20 @@
 
 #### pyranges
 
+```
 result = gr.cluster(strand="same")
+```
 
 #### bioconductor
 
+```
 result = reduce(gr)
 
+```
 
 #### pybedtools
 
+```
 # using merge because cluster does not work;
 #  output has same number of lines
 
@@ -29,11 +34,13 @@ minus = pb1.sort().merge(S="-", c=cols_to_keep, o="first")
 minus.head()
 result = plus.cat(minus, s=True, c=[4, 5, 6], o="first")
 
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+
 | Chromosome   | Start     | End       | Strand   |
 | (int8)       | (int32)   | (int32)   | (int8)   |
@@ -47,9 +54,11 @@ result = plus.cat(minus, s=True, c=[4, 5, 6], o="first")
 | chrY         | 57212183  | 57213125  | -        |
 +--------------+-----------+-----------+----------+
 PyRanges object has 60323 sequences from 25 chromosomes.
+```
 
 #### bioconductor
 
+```
 GRanges object with 60323 ranges and 0 metadata columns:
           seqnames        ranges strand
              <Rle>     <IRanges>  <Rle>
@@ -67,9 +76,11 @@ GRanges object with 60323 ranges and 0 metadata columns:
   -------
   seqinfo: 25 sequences from an unspecified genome; no seqlengths
 
+```
 
 #### pybedtools
 
+```
 chr1	17368	17436	17369	17436	-
 chr1	65418	65433	65419	65433	+
 chr1	89550	91105	89551	91105	-
@@ -82,4 +93,5 @@ chr1	504979	505103	504980	505103	-
 chr1	522858	522928	522859	522928	-
 Number of lines: 60323
 
+```
 

@@ -6,22 +6,29 @@
 
 #### pyranges
 
+```
 result = gr2.overlap(gr, strandedness="same")
+```
 
 #### bioconductor
 
+```
 result = findOverlapPairs(gr2, gr1, ignore.strand = FALSE)
 result = first(result)
 
+```
 
 #### pybedtools
 
+```
 result = pb2.intersect(pb1, s=True, wa=True)
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+------------+-------------+----------------+--------------+-------------+
 | Chromosome   | Start     | End       | Strand   | Feature    | GeneID      | TranscriptID   | ExonNumber   | ExonID      |
 | (int8)       | (int32)   | (int32)   | (int8)   | (object)   | (float64)   | (float64)      | (int16)      | (float64)   |
@@ -35,9 +42,11 @@ result = pb2.intersect(pb1, s=True, wa=True)
 | chrY         | 26277922  | 26354418  | -        | gene       | 229238.0    | nan            | -1           | nan         |
 +--------------+-----------+-----------+----------+------------+-------------+----------------+--------------+-------------+
 PyRanges object has 5972 sequences from 24 chromosomes.
+```
 
 #### bioconductor
 
+```
 GRanges object with 5973 ranges and 20 metadata columns:
          seqnames              ranges strand |   source       type     score
             <Rle>           <IRanges>  <Rle> | <factor>   <factor> <numeric>
@@ -120,9 +129,11 @@ GRanges object with 5973 ranges and 20 metadata columns:
   -------
   seqinfo: 25 sequences from an unspecified genome; no seqlengths
 
+```
 
 #### pybedtools
 
+```
 chr19	HAVANA	transcript	16574907	16578777	.	-	.	gene_id "ENSG00000105085.10"; transcript_id "ENST00000597244.1"; gene_type "protein_coding"; gene_name "MED26"; transcript_type "retained_intron"; transcript_name "MED26-202"; level 2; transcript_support_level "NA"; havana_gene "OTTHUMG00000182433.4"; havana_transcript "OTTHUMT00000461177.1";
 chr16	HAVANA	transcript	57186333	57239957	.	+	.	gene_id "ENSG00000159579.13"; transcript_id "ENST00000537866.5"; gene_type "protein_coding"; gene_name "RSPRY1"; transcript_type "protein_coding"; transcript_name "RSPRY1-202"; level 2; protein_id "ENSP00000443176.1"; transcript_support_level "2"; tag "alternative_5_UTR"; tag "basic"; tag "appris_principal_1"; tag "CCDS"; ccdsid "CCDS10775.1"; havana_gene "OTTHUMG00000133462.6"; havana_transcript "OTTHUMT00000432953.1";
 chr11	HAVANA	exon	119421611	119422562	.	-	.	gene_id "ENSG00000154096.13"; transcript_id "ENST00000528522.5"; gene_type "protein_coding"; gene_name "THY1"; transcript_type "protein_coding"; transcript_name "THY1-206"; exon_number 1; exon_id "ENSE00002196788.1"; level 2; protein_id "ENSP00000431301.1"; transcript_support_level "2"; tag "alternative_5_UTR"; tag "basic"; tag "appris_principal_1"; tag "CCDS"; ccdsid "CCDS8424.1"; havana_gene "OTTHUMG00000166202.4"; havana_transcript "OTTHUMT00000388372.1";
@@ -135,4 +146,5 @@ chr1	HAVANA	transcript	156035301	156053794	.	-	.	gene_id "ENSG00000160803.7"; tr
 chr1	HAVANA	transcript	150810094	150876705	.	-	.	gene_id "ENSG00000143437.20"; transcript_id "ENST00000471844.6"; gene_type "protein_coding"; gene_name "ARNT"; transcript_type "nonsense_mediated_decay"; transcript_name "ARNT-204"; level 2; protein_id "ENSP00000425899.1"; transcript_support_level "2"; tag "non_canonical_TEC"; havana_gene "OTTHUMG00000035011.3"; havana_transcript "OTTHUMT00000360627.2";
 Number of lines: 5972
 
+```
 
