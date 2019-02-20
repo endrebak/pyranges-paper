@@ -90,14 +90,16 @@ def fix_description(desc):
     assert len(desc) < 160, "Description too long (>= 160 chars.)"
     return "\n".join(wrap(desc, width=80)) + "\n"
 
+
 descriptions = pd.read_csv("supplementaries/descriptions.yaml", sep="\t", header=0)
 print(descriptions)
 
+
 rule graph_time_memory_together:
     input:
-        "{prefix}/benchmark/collected_timings_mean_{function}.txt"
+        prefix + "/benchmark/collected_timings_mean_{function}.txt"
     output:
-        "{prefix}/benchmark/graphs/time_memory_together_{function}.{extension}"
+        "supplementary_paper/time_memory_together_{function}.{extension}"
     params:
         function = lambda w: w.function.capitalize(),
         description = lambda w: fix_description(descriptions[descriptions.Function == w.function].Description.iloc[0])

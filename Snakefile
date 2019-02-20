@@ -159,7 +159,9 @@ extensions = "pdf png".split()
 time_files = expand("{prefix}/benchmark/graphs/time_{filetype}_{category}.{extension}", prefix=prefix, filetype=filetypes, category=category_dict, extension=extensions)
 memory_files = expand("{prefix}/benchmark/graphs/memory_{filetype}_{category}.{extension}", prefix=prefix, filetype=filetypes, category=category_dict, extension=extensions)
 main_paper_graphs = expand("{prefix}/benchmark/graphs/main_paper_{filetype}_{category}.{extension}", measure="time memory".split(), prefix=prefix, filetype=filetypes, category="binary", extension=extensions)
-time_mem_together_graphs = expand("{prefix}/benchmark/graphs/time_memory_together_{function}.{extension}", measure="time memory".split(), prefix=prefix, filetype=filetypes, function=ss.Function.drop_duplicates(), extension="png")
+time_mem_together_graphs = expand("supplementary_paper/time_memory_together_{function}.{extension}",
+       measure="time memory".split(), prefix=prefix, filetype=filetypes,
+       function=ss.Function.drop_duplicates(), extension="png")
 
 all_mds = expand("supplementary_paper/{function}_all.md", function=ss.Function.drop_duplicates())
 

@@ -140,7 +140,7 @@ rule create_all_mds:
         result_handle.write("## Code\n\n")
         for library in libraries:
             result_handle.write("#### " + library + "\n\n")
-            result_handle.write(category_code[category][library][function] + "\n\n")
+            result_handle.write("```\n" + category_code[category][library][function] + "\n```\n\n")
 
 
         result_handle.write("## Results\n\n")
@@ -148,7 +148,7 @@ rule create_all_mds:
             result_handle.write("#### " + library + "\n\n")
             f = [f for f in input.result if library.replace("pyranges", "pyranges_1") in f][0]
             source = open(f).readlines()
-            result = "".join(source)
+            result = "```\n" + "".join(source) + "\n```"
             result_handle.write(result + "\n\n")
 
         result_handle.close()
