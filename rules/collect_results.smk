@@ -38,7 +38,6 @@ rule collect_times:
                         "Seconds": timing, "Function": function, "Library": library, "Log10NBIntervals":
                         np.log10(size)}
 
-
             rowdicts.append(rowdict)
 
         df = pd.DataFrame.from_dict(rowdicts)

@@ -8,6 +8,7 @@ nearest	Find the intervals in B closest to those in A.
 nearest_nonoverlapping	Find the non-overlapping intervals in B closest to those in A.
 overlap	Find the intervals in A overlapping at least one of the intervals in B.
 read_bed	Read a bed file into a GenomicRanges object.
+read_bam	Read a bam file into a GenomicRanges object.
 read_gtf	Read a gtf file into a GenomicRanges object.
 rle_add	Add two Rle objects.
 rle_divide	Divide one Rle object by another.

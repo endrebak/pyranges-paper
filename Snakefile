@@ -18,6 +18,7 @@ binary_map = yaml.load(open("supplementaries/binary.yaml"))
 rle_map = yaml.load(open("supplementaries/rle.yaml"))
 unary_map = yaml.load(open("supplementaries/unary.yaml"))
 io_map = yaml.load(open("supplementaries/io.yaml"))
+write_map = yaml.load(open("supplementaries/write.yaml"))
 tree_map = yaml.load(open("supplementaries/tree.yaml"))
 
 category_code = {"tree": tree_map, "unary": unary_map, "rle": rle_map, "binary": binary_map, "io": io_map}
@@ -57,6 +58,7 @@ binary_ops = list(binary_map["pybedtools"]) + list(binary_map["bioconductor"])
 tree_ops = list(tree_map["ncls"]) + list(tree_map["bx-python"])
 rle_ops = list(rle_map["pyranges"])
 io_ops = list(io_map["pyranges"])
+write_ops = list(write_map["pyranges"])
 
 
 wildcard_constraints:
@@ -113,7 +115,7 @@ def _expand(functions, path="{prefix}/benchmark/{function}/{library}/{filetype}/
                 expand(path, function=function, prefix=prefix, iteration=iterations, size=pybedtool_sizes, library=smaller_libs, filetype=filetypes)
         elif function == "read_gtf":
             _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype="annotation")
-        elif function in ["read_bed"]:
+        elif function in ["read_bed", "read_bam"]:
             _outfiles = expand(path, function=function, prefix=prefix, iteration=iterations, size=_sizes, library=larger_libs, filetype="reads")
 
         outfiles.extend(_outfiles)
@@ -137,7 +139,6 @@ tree_files = _expand(tree_functions)
 
 io_functions = ss[ss.Category == "io"].Function.drop_duplicates()
 io_files = _expand(io_functions)
-
 
 category_dict = {"unary": single_pyranges_files,
                  "binary": binary_pyranges_files,
@@ -166,7 +167,7 @@ time_mem_together_graphs = expand("supplementary_paper/time_memory_together_{fun
 all_mds = expand("supplementary_paper/{function}_all.md", function=ss.Function.drop_duplicates())
 
 for rule in glob.glob("rules/*.smk"):
-    print("including: " + rule, file=sys.stderr)
+    # print("including: " + rule, file=sys.stderr)
 
     # line to comment in if you want to rerun analyses with -F without regenerating the data
     # if "generate_data" in rule: continue
@@ -182,14 +183,28 @@ rule all:
     input:
         time_files, memory_files, main_paper_graphs, time_mem_together_graphs, all_mds
 
-rule supplementary_code:
+rule differences:
     input:
-        expand("{prefix}/benchmark/supplementaries/{category}.pdf", prefix=prefix, category=category_dict)
+        expand("{prefix}/benchmark/differences/{num_cores}_{filetype}_{category}_differences.txt",
+               num_cores = sorted(num_cores), filetype=filetypes, category="unary binary rle".split(), prefix=prefix),
+        expand("{prefix}/benchmark/differences/{num_cores}_{filetype}_{category}_differences.txt",
+               num_cores = [1], filetype=filetypes, category="tree io".split(), prefix=prefix)
+
+# f = "supplementary_paper/{category}_all.md"
+rule supplementary:
+    input:
+        "supplementary_paper/README.pdf"
+
+        # expand(f, category=category_dict)
+
+# rule supplementary_code:
+#     input:
+#         expand("{prefix}/benchmark/supplementaries/{category}.pdf", prefix=prefix, category=category_dict)
 
 
-rule supplementary_graphs:
-    input:
-        expand("supplementary_paper/{measure}.md", measure="time memory".split())
+# rule supplementary_graphs:
+#     input:
+#         expand("supplementary_paper/{measure}.md", measure="time memory".split())
 
 
 

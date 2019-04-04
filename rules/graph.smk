@@ -84,17 +84,6 @@ rule collect_filetype_split_function:
         df[df.Function == wildcards.function].to_csv(output[0], sep="\t")
 
 
-def fix_description(desc):
-
-    from textwrap import wrap
-    assert len(desc) < 160, "Description too long (>= 160 chars.)"
-    return "\n".join(wrap(desc, width=80)) + "\n"
-
-
-descriptions = pd.read_csv("supplementaries/descriptions.yaml", sep="\t", header=0)
-print(descriptions)
-
-
 rule graph_time_memory_together:
     input:
         prefix + "/benchmark/collected_timings_mean_{function}.txt"
@@ -102,6 +91,5 @@ rule graph_time_memory_together:
         "supplementary_paper/time_memory_together_{function}.{extension}"
     params:
         function = lambda w: w.function.capitalize(),
-        description = lambda w: fix_description(descriptions[descriptions.Function == w.function].Description.iloc[0])
     script:
         "../scripts/graph_time_mem_together.R"

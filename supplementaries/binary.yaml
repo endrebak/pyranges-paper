@@ -44,7 +44,6 @@ pybedtools:
   nearest_nonoverlapping:
     result = pb2.sort().closest(pb1.sort(), s=True, t="first", io=True, d=True)
   set_intersect: |
-    # the first flag is needed to keep the sixth columns
     sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
 
     if extension == "gtf":
@@ -55,7 +54,6 @@ pybedtools:
     sb = pb2.sort().merge(s=True, c=cols_to_keep, o="first")
     result = sc.intersect(sb, s=True)
   set_union: |
-    # the first flag is needed to keep the sixth columns
     sc = pb1.sort().merge(s=True, c=[4, 5, 6], o="first")
 
     if extension == "gtf":

@@ -13,18 +13,13 @@ bioconductor:
 
 pybedtools:
   cluster: |
-    # using merge because cluster does not work;
-    #  output has same number of lines
-
     if extension == "gtf":
         cols_to_keep = [4, 5, 7]
     elif extension == "bed":
         cols_to_keep = [4, 5, 6]
 
     plus = pb1.sort().merge(S="+", c=cols_to_keep, o="first")
-    plus.head()
     minus = pb1.sort().merge(S="-", c=cols_to_keep, o="first")
-    minus.head()
     result = plus.cat(minus, s=True, c=[4, 5, 6], o="first")
   sort:
     result = pb1.sort()

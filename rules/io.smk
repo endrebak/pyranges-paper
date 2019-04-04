@@ -1,6 +1,31 @@
+
+rule bed_to_bam:
+    input:
+        bed = "{prefix}/data/download/{chip}_{size}.bed.gz",
+        genome = "{prefix}/data/download/chromsizes.txt"
+    output:
+        "{prefix}/data/download/{chip}_{size}.bam"
+    shell:
+        "bedToBam -i {input.bed} -g {input.genome} > {output[0]}"
+
+
+def correct_file_io(w):
+
+    op = w.io_operation
+
+    if op == "read_bed":
+        return "{prefix}/data/download/input_{size}.bed.gz".format(**w)
+    elif op == "read_gtf":
+        return "{prefix}/data/download/annotation_{size}.gtf.gz".format(**w)
+    else:
+        return "{prefix}/data/download/input_{size}.bam".format(**w)
+
+
+
+
 rule pyranges_io:
     input:
-        correct_file
+        correct_file_io
     output:
         time = "{prefix}/benchmark/{io_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}_time.txt",
         result = "{prefix}/benchmark/{io_operation}/pyranges_{num_cores}/{filetype}/{iteration}_{size}.result",
@@ -16,7 +41,7 @@ rule pyranges_io:
 
 rule bioconductor_io:
     input:
-        correct_file
+        correct_file_io
     output:
         time = "{prefix}/benchmark/{io_operation}/bioconductor/{filetype}/{iteration}_{size}_time.txt",
         result = "{prefix}/benchmark/{io_operation}/bioconductor/{filetype}/{iteration}_{size}.result",
