@@ -6,15 +6,20 @@
 
 #### pyranges
 
+```
 result = gr2.join(gr, strandedness="same")
 
+```
 
 #### pybedtools
 
+```
 result = pb2.intersect(pb1, wao=True, s=True)
+```
 
 #### bioconductor
 
+```
 result <- findOverlapPairs(gr1, gr2, ignore.strand = FALSE)
 df1 = as.data.frame(first(result))
 df2 = as.data.frame(second(result))
@@ -22,11 +27,13 @@ colnames(df2) = paste0(colnames(df2), "_b")
 df = merge(df1, df2, by=0)
 result = makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
 
+```
 
 ## Results
 
 #### pyranges
 
+```
 +--------------+-----------+-----------+----------+------------+-------------+----------------+--------------+-------------+-----------+-----------+------------+
 | Chromosome   | Start     | End       | Strand   | Feature    | GeneID      | TranscriptID   | ExonNumber   | ExonID      | Start_b   | End_b     | Strand_b   |
 | (int8)       | (int32)   | (int32)   | (int8)   | (object)   | (float64)   | (float64)      | (int16)      | (float64)   | (int32)   | (int32)   | (int8)     |
@@ -40,9 +47,11 @@ result = makeGRangesFromDataFrame(df, keep.extra.columns=TRUE)
 | chrY         | 26277922  | 26354418  | -        | gene       | 229238.0    | nan            | -1           | nan         | 26350175  | 26350275  | -          |
 +--------------+-----------+-----------+----------+------------+-------------+----------------+--------------+-------------+-----------+-----------+------------+
 PyRanges object has 5972 sequences from 24 chromosomes.
+```
 
 #### pybedtools
 
+```
 chr2	ENSEMBL	CDS	110641034	110641205	.	-	1	gene_id "ENSG00000169679.14"; transcript_id "ENST00000535254.5"; gene_type "protein_coding"; gene_name "BUB1"; transcript_type "protein_coding"; transcript_name "BUB1-212"; exon_number 22; exon_id "ENSE00001146562.1"; level 3; protein_id "ENSP00000441013.1"; transcript_support_level "2"; tag "basic"; tag "appris_alternative_2"; tag "CCDS"; ccdsid "CCDS62984.1"; havana_gene "OTTHUMG00000153638.5";	.	-1	-1	.	-1	.	0
 chr17	HAVANA	exon	8319007	8319159	.	+	.	gene_id "ENSG00000198844.11"; transcript_id "ENST00000361926.7"; gene_type "protein_coding"; gene_name "ARHGEF15"; transcript_type "protein_coding"; transcript_name "ARHGEF15-201"; exon_number 13; exon_id "ENSE00000855086.1"; level 2; protein_id "ENSP00000355026.3"; transcript_support_level "1"; tag "basic"; tag "appris_principal_1"; tag "CCDS"; ccdsid "CCDS11139.1"; havana_gene "OTTHUMG00000108187.6"; havana_transcript "OTTHUMT00000226993.3";	.	-1	-1	.	-1	.	0
 chr22	HAVANA	exon	43995391	43995490	.	+	.	gene_id "ENSG00000100347.14"; transcript_id "ENST00000493621.1"; gene_type "protein_coding"; gene_name "SAMM50"; transcript_type "processed_transcript"; transcript_name "SAMM50-205"; exon_number 1; exon_id "ENSE00001829394.1"; level 2; transcript_support_level "2"; havana_gene "OTTHUMG00000150557.4"; havana_transcript "OTTHUMT00000318983.1";	.	-1	-1	.	-1	.	0
@@ -55,9 +64,11 @@ chr3	HAVANA	exon	108213931	108214021	.	-	.	gene_id "ENSG00000114446.4"; transcri
 chr17	HAVANA	exon	47051296	47051400	.	+	.	gene_id "ENSG00000263142.5"; transcript_id "ENST00000570311.1"; gene_type "transcribed_unprocessed_pseudogene"; gene_name "LRRC37A17P"; transcript_type "transcribed_unprocessed_pseudogene"; transcript_name "LRRC37A17P-201"; exon_number 8; exon_id "ENSE00002636545.1"; level 2; transcript_support_level "NA"; ont "PGO:0000005"; ont "PGO:0000019"; tag "basic"; havana_gene "OTTHUMG00000178082.1"; havana_transcript "OTTHUMT00000440449.1";	.	-1	-1	.	-1	.	0
 Number of lines: 103088
 
+```
 
 #### bioconductor
 
+```
 GRanges object with 5973 ranges and 26 metadata columns:
          seqnames              ranges strand |   Row.names seqnames_b   start_b
             <Rle>           <IRanges>  <Rle> | <character>   <factor> <integer>
@@ -153,5 +164,5 @@ GRanges object with 5973 ranges and 26 metadata columns:
   -------
   seqinfo: 24 sequences from an unspecified genome; no seqlengths
 
+```
 
-                                                

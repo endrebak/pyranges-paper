@@ -1,0 +1,18 @@
+bioconductor:
+  to_bed: |
+    export.bed("deleteme.bed")
+  to_bigwig: |
+    export.bw("deleteme.bw")
+  to_gtf: |
+    export.gff("deleteme.gtf")
+
+
+pyranges:
+  to_bed: |
+    gr.out.bed("deleteme.bed")
+  to_bam: |
+    gr.out.bam("deleteme.bam")
+  to_gtf: |
+    gr.out.gtf("deleteme.gtf")
+  to_bigwig: |
+    gr.out.bigwig("deleteme.bw", chromosome_sizes)

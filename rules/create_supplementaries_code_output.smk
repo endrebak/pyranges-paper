@@ -4,7 +4,6 @@ from natsort import natsorted
 
 def supps(w):
 
-    # print("w: ", w)
     results = _expand(ss[ss.Category == w.category].Function,
                       "{prefix}/benchmark/{function}/{library}/{filetype}/{iteration}_{size}.result",
                       iterations=iterations[:1],
@@ -13,7 +12,6 @@ def supps(w):
                       num_cores=num_cores[:1])
 
     return results
-
 
 
 rule create_test_md:
@@ -152,12 +150,6 @@ rule create_all_mds:
             result_handle.write(result + "\n\n")
 
         result_handle.close()
-
-
-
-
-
-
 
 
 rule md_to_pdf:
